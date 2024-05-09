@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Pengguna {
+  id_table         Int      @id               @default(autoincrement())
+  nama             String   @db.VarChar(255)
+  username         String   @db.VarChar(255)  @unique
+  password_encrypt String   @db.VarChar(255)
+  password_hash    String   @db.VarChar(255)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@map("pengguna")
+}
+
+model Kategori {
+  id_table         Int      @id               @default(autoincrement())
+  id_kategori      Int      @db.UnsignedInt   @unique
+  nama             String   @db.VarChar(255)  @unique
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  subkategori      SubKategori[]
+
+  @@map("kategori")
+}
+
+model SubKategori {
+  id_table         Int      @id               @default(autoincrement())
+  id_subkategori   Int      @db.UnsignedInt   @unique
+  nama             String   @db.VarChar(255)  @unique
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  kategori_id      Int      @db.UnsignedInt
+  kategori         Kategori @relation(fields: [kategori_id], references: [id_kategori], onUpdate: NoAction, onDelete:  Cascade)
+
+  produk           Produk[]
+
+  @@map("subkategori")
+}
+
+model Produk {
+  id_table                Int           @id               @default(autoincrement())
+  kode_item               String        @unique           @db.VarChar(255)
+  barcode                 String?       @unique           @db.VarChar(255)
+  kode_pabrik             String?       @db.VarChar(255) 
+  kode_toko               String?       @db.VarChar(255)
+  kode_supplier           String?       @db.VarChar(255)
+  nama_produk             String        
+  nama_produk_asli        String?       
+  nama_produk_sebutan     String?       
+  subkategori_id          Int           @db.UnsignedInt
+  merk                    String?       @db.VarChar(255)
+  tipe                    String?       @db.VarChar(255)
+  satuan_besar            String?       @db.VarChar(255)
+  satuan_kecil            String?       @db.VarChar(255)
+  isi_satuan_besar        String?       @db.VarChar(255)
+  konversi                Int?          @db.UnsignedInt
+  harga_pokok             Int?          @db.UnsignedInt
+  harga_1                 Int?          @db.UnsignedInt
+  harga_2                 Int?          @db.UnsignedInt
+  harga_3                 Int?          @db.UnsignedInt
+  harga_4                 Int?          @db.UnsignedInt
+  harga_5                 Int?          @db.UnsignedInt
+  harga_6                 Int?          @db.UnsignedInt
+  stok                    Int?          @db.UnsignedInt
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Restrict)
+
+  @@map("produk")        
+}
+
+
