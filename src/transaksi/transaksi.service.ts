@@ -134,6 +134,7 @@ export class TransaksiService {
           },
         },
         created_at: date,
+        updated_at: date
       },
       include: {
         transaksidetail: {
