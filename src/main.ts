@@ -1,4 +1,5 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './utils/global/global.exception';
 
@@ -9,6 +10,8 @@ async function bootstrap() {
     exclude: ['/'],
   });
 
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
   app.useGlobalFilters(new GlobalExceptionFilter(app.get(HttpAdapterHost)));
   await app.listen(3434);
 }

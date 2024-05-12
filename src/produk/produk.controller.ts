@@ -1,6 +1,16 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  UsePipes,
+} from '@nestjs/common';
 import { SuccessResponse } from '../utils/global/global.response';
-import { ProdukQuery } from './produk.dto';
+import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
+import { CreateBulkProduk, ProdukQuery, createBulkProduk } from './produk.dto';
 import { ProdukService } from './produk.service';
 
 @Controller('produk')
@@ -15,6 +25,23 @@ export class ProdukController {
       return {
         success: true,
         status_code: HttpStatus.OK,
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('bulk')
+  @UsePipes(new ZodValidationPipe(createBulkProduk))
+  @HttpCode(HttpStatus.CREATED)
+  async store(@Body() body: CreateBulkProduk): Promise<SuccessResponse> {
+    try {
+      const data = await this.produkService.createBulkProduk(body);
+
+      return {
+        success: true,
+        status_code: HttpStatus.CREATED,
         data,
       };
     } catch (error) {
