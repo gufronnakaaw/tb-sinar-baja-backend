@@ -33,9 +33,7 @@ export class TransaksiController {
       return {
         success: true,
         status_code: HttpStatus.OK,
-        data: {
-          message: 'all transactions here',
-        },
+        data: await this.transaksiService.getTransaksi(),
       };
     } catch (error) {
       throw error;

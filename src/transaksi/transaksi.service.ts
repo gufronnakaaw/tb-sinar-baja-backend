@@ -7,6 +7,37 @@ import { CreateTransaksiDto } from './transaksi.dto';
 export class TransaksiService {
   constructor(private prisma: PrismaService) {}
 
+  async getTransaksi() {
+    const results = await this.prisma.transaksi.findMany({
+      include: {
+        transaksidetail: {
+          select: {
+            jumlah: true,
+            satuan: true,
+            nama_produk: true,
+            harga: true,
+            sub_total: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return results.map((transaksi) => {
+      delete transaksi.id_table;
+
+      const { transaksidetail, ...result } = transaksi;
+      delete transaksi.transaksidetail;
+
+      return {
+        ...result,
+        list_produk: transaksidetail,
+      };
+    });
+  }
+
   async getTransaksiById(id: string) {
     const result = await this.prisma.transaksi.findFirst({
       where: {
