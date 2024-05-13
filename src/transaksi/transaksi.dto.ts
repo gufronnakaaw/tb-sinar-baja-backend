@@ -14,9 +14,11 @@ export const createTransaksiSchema = z.object({
   tunai: z.number().positive(),
   tipe: z.string().trim().optional(),
   unique_key: z.string().trim().optional(),
+  metode: z.string().trim().optional(),
   list_produk: z
     .array(
       z.object({
+        kode_item: z.string(),
         jumlah: z.number().positive(),
         satuan: z.string().trim(),
         nama_produk: z.string().trim(),

@@ -12,6 +12,7 @@ export class TransaksiService {
       include: {
         transaksidetail: {
           select: {
+            kode_item: true,
             jumlah: true,
             satuan: true,
             nama_produk: true,
@@ -46,6 +47,7 @@ export class TransaksiService {
       include: {
         transaksidetail: {
           select: {
+            kode_item: true,
             jumlah: true,
             satuan: true,
             nama_produk: true,
@@ -79,6 +81,7 @@ export class TransaksiService {
       include: {
         transaksidetail: {
           select: {
+            kode_item: true,
             jumlah: true,
             satuan: true,
             nama_produk: true,
@@ -103,51 +106,69 @@ export class TransaksiService {
       return result;
     }
 
+    for (const produk of body.list_produk) {
+      await this.prisma.produk.update({
+        where: {
+          kode_item: produk.kode_item,
+        },
+        data: {
+          stok: {
+            decrement: produk.jumlah,
+          },
+        },
+      });
+    }
+
     const date = new Date();
-    const result = await this.prisma.transaksi.create({
-      data: {
-        id_transaksi: generateID('TX', date),
-        keterangan: body.keterangan,
-        penerima: body.penerima,
-        no_telp: body.no_telp,
-        pengiriman: body.pengiriman,
-        alamat: body.alamat,
-        ongkir: body.ongkir,
-        pajak: body.pajak,
-        persen_pajak: body.persen_pajak,
-        total_belanja: body.total_belanja,
-        total_pembayaran: body.total_pembayaran,
-        tunai: body.tunai,
-        tipe: body.tipe,
-        unique_key: body.unique_key,
-        transaksidetail: {
-          createMany: {
-            data: body.list_produk.map((produk) => {
-              return {
-                jumlah: produk.jumlah,
-                satuan: produk.satuan,
-                nama_produk: produk.nama_produk,
-                harga: produk.harga,
-                sub_total: produk.sub_total,
-              };
-            }),
+    const [result] = await this.prisma.$transaction([
+      this.prisma.transaksi.create({
+        data: {
+          id_transaksi: generateID('TX', date),
+          keterangan: body.keterangan,
+          penerima: body.penerima,
+          no_telp: body.no_telp,
+          pengiriman: body.pengiriman,
+          alamat: body.alamat,
+          ongkir: body.ongkir,
+          pajak: body.pajak,
+          persen_pajak: body.persen_pajak,
+          total_belanja: body.total_belanja,
+          total_pembayaran: body.total_pembayaran,
+          tunai: body.tunai,
+          tipe: body.tipe,
+          unique_key: body.unique_key,
+          metode: body.metode,
+          transaksidetail: {
+            createMany: {
+              data: body.list_produk.map((produk) => {
+                return {
+                  jumlah: produk.jumlah,
+                  satuan: produk.satuan,
+                  nama_produk: produk.nama_produk,
+                  kode_item: produk.kode_item,
+                  harga: produk.harga,
+                  sub_total: produk.sub_total,
+                };
+              }),
+            },
+          },
+          created_at: date,
+          updated_at: date,
+        },
+        include: {
+          transaksidetail: {
+            select: {
+              kode_item: true,
+              jumlah: true,
+              satuan: true,
+              nama_produk: true,
+              harga: true,
+              sub_total: true,
+            },
           },
         },
-        created_at: date,
-        updated_at: date,
-      },
-      include: {
-        transaksidetail: {
-          select: {
-            jumlah: true,
-            satuan: true,
-            nama_produk: true,
-            harga: true,
-            sub_total: true,
-          },
-        },
-      },
-    });
+      }),
+    ]);
 
     delete result.id_table;
 
