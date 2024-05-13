@@ -14,6 +14,9 @@ export class GudangService {
         created_at: true,
         updated_at: true,
       },
+      orderBy: {
+        created_at: 'desc',
+      },
     });
   }
 
