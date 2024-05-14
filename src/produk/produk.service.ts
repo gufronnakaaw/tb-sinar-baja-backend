@@ -97,6 +97,18 @@ export class ProdukService {
               },
             },
           ],
+          AND: [
+            {
+              stok: {
+                gt: 0,
+              },
+            },
+            {
+              harga_4: {
+                gt: 0,
+              },
+            },
+          ],
         },
       });
 
