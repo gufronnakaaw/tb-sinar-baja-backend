@@ -13,6 +13,6 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
   app.useGlobalFilters(new GlobalExceptionFilter(app.get(HttpAdapterHost)));
-  await app.listen(3434);
+  await app.listen(process.env.MODE == 'production' ? 3434 : 3535);
 }
 bootstrap();
