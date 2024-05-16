@@ -10,7 +10,11 @@ import {
 } from '@nestjs/common';
 import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
-import { CreateTransaksiDto, createTransaksiSchema } from './transaksi.dto';
+import {
+  CreateTransaksiDto,
+  TransaksiQuery,
+  createTransaksiSchema,
+} from './transaksi.dto';
 import { TransaksiService } from './transaksi.service';
 
 @Controller('transaksi')
@@ -19,10 +23,10 @@ export class TransaksiController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async index(@Query('id') id: string): Promise<SuccessResponse> {
+  async index(@Query() query: TransaksiQuery): Promise<SuccessResponse> {
     try {
-      if (id) {
-        const data = await this.transaksiService.getTransaksiById(id);
+      if (query.id) {
+        const data = await this.transaksiService.getTransaksiById(query.id);
         return {
           success: true,
           status_code: HttpStatus.OK,
@@ -33,7 +37,7 @@ export class TransaksiController {
       return {
         success: true,
         status_code: HttpStatus.OK,
-        data: await this.transaksiService.getTransaksi(),
+        data: await this.transaksiService.getTransaksi(query),
       };
     } catch (error) {
       throw error;

@@ -1,13 +1,58 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { generateID } from 'src/utils/generate.util';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreateTransaksiDto } from './transaksi.dto';
+import { CreateTransaksiDto, TransaksiQuery } from './transaksi.dto';
 
 @Injectable()
 export class TransaksiService {
   constructor(private prisma: PrismaService) {}
 
-  async getTransaksi() {
+  async getTransaksi(query: TransaksiQuery) {
+    if (query.search) {
+      const results = await this.prisma.transaksi.findMany({
+        where: {
+          OR: [
+            {
+              id_transaksi: {
+                contains: query.search,
+              },
+            },
+            {
+              penerima: {
+                contains: query.search,
+              },
+            },
+          ],
+        },
+        include: {
+          transaksidetail: {
+            select: {
+              kode_item: true,
+              jumlah: true,
+              satuan: true,
+              nama_produk: true,
+              harga: true,
+              gudang: true,
+              rak: true,
+              sub_total: true,
+            },
+          },
+        },
+      });
+
+      return results.map((transaksi) => {
+        delete transaksi.id_table;
+
+        const { transaksidetail, ...result } = transaksi;
+        delete transaksi.transaksidetail;
+
+        return {
+          ...result,
+          list_produk: transaksidetail,
+        };
+      });
+    }
+
     const results = await this.prisma.transaksi.findMany({
       include: {
         transaksidetail: {

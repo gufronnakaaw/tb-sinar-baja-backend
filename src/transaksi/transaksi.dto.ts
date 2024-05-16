@@ -14,7 +14,7 @@ export const createTransaksiSchema = z.object({
   total_belanja: z.number().positive(),
   total_pembayaran: z.number().positive(),
   tunai: z.number().positive(),
-  kembalian: z.number().positive(),
+  kembalian: z.number(),
   tipe: z.string().trim().optional(),
   unique_key: z.string().trim().optional(),
   metode: z.string().trim().optional(),
@@ -35,3 +35,8 @@ export const createTransaksiSchema = z.object({
 });
 
 export type CreateTransaksiDto = z.infer<typeof createTransaksiSchema>;
+
+export type TransaksiQuery = {
+  id: string;
+  search: string;
+};
