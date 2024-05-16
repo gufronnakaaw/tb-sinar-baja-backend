@@ -19,7 +19,7 @@ export class ProdukService {
           nama_produk: item.nama_produk,
           nama_produk_asli: item.nama_produk_asli,
           nama_produk_sebutan: item.nama_produk_sebutan,
-          rak: !item.rak ? 'Rak 10' : item.rak,
+          rak: item.rak,
           harga_1: item.harga_1,
           harga_2: item.harga_2,
           harga_3: item.harga_3,
@@ -27,6 +27,9 @@ export class ProdukService {
           harga_5: item.harga_5,
           harga_6: item.harga_6,
           harga_pokok: item.harga_pokok,
+          harga_diskon: item.harga_diskon,
+          berat: item.berat,
+          volume: item.volume,
           konversi: item.konversi,
           stok: item.stok,
           stok_aman: item.stok_aman,
@@ -201,7 +204,8 @@ export class ProdukService {
 
     return {
       produk,
-      total_produk: totalProduk,
+      page,
+      total_items: totalProduk,
       total_page: Math.ceil(totalProduk / size),
     };
   }

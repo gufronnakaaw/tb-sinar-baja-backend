@@ -22,7 +22,7 @@ export const createBulkProduk = z.object({
         nama_produk: z.string(),
         nama_produk_asli: z.string().optional().nullable(),
         nama_produk_sebutan: z.string().optional().nullable(),
-        sub_kategori_produk: z.number(),
+        sub_kategori_produk: z.string(),
         merk: z.string().optional().nullable(),
         tipe: z.string().optional().nullable(),
         satuan_besar: z.string().optional().nullable(),
@@ -36,6 +36,9 @@ export const createBulkProduk = z.object({
         harga_4: z.number().optional().nullable(),
         harga_5: z.number().optional().nullable(),
         harga_6: z.number().optional().nullable(),
+        harga_diskon: z.number().optional().nullable(),
+        berat: z.number().optional().nullable(),
+        volume: z.number().optional().nullable(),
       }),
     )
     .min(1),
