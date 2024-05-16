@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 import { SuccessResponse } from '../utils/global/global.response';
@@ -12,8 +14,13 @@ import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
   CreateKategoriType,
   CreateSubKategoriType,
+  KategoriQuery,
+  UpdateKategoriType,
+  UpdateSubKategoriType,
   createKategoriSchema,
   createSubKategoriSchema,
+  updateKategoriSchema,
+  updateSubKategoriSchema,
 } from './kategori.dto';
 import { KategoriService } from './kategori.service';
 
@@ -23,15 +30,12 @@ export class KategoriController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async index(): Promise<SuccessResponse> {
+  async index(@Query() query: KategoriQuery): Promise<SuccessResponse> {
     try {
       return {
         success: true,
         status_code: HttpStatus.OK,
-        data: {
-          kategori: await this.kategoriService.getKategori(),
-          subkategori: await this.kategoriService.getSubKategori(),
-        },
+        data: await this.kategoriService.getKategori(query),
       };
     } catch (error) {
       throw error;
@@ -66,6 +70,40 @@ export class KategoriController {
         success: true,
         status_code: HttpStatus.CREATED,
         data: await this.kategoriService.createSubKategori(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch()
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateKategoriSchema))
+  async updateKategori(
+    @Body() body: UpdateKategoriType,
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.kategoriService.updateKategori(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('subkategori')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateSubKategoriSchema))
+  async updateSubKategori(
+    @Body() body: UpdateSubKategoriType,
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.kategoriService.updateSubKategori(body),
       };
     } catch (error) {
       console.log(error);
