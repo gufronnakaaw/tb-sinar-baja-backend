@@ -7,12 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  owner
+  admin
+  cashier
+}
+
 model Pengguna {
   id_table         Int      @id               @default(autoincrement())
   nama             String   @db.VarChar(255)
   username         String   @db.VarChar(255)  @unique
   password_encrypt String   @db.VarChar(255)
   password_hash    String   @db.VarChar(255)
+  role             Role?
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -33,13 +40,13 @@ model Kategori {
 
 model SubKategori {
   id_table         Int      @id               @default(autoincrement())
-  id_subkategori   Int      @db.UnsignedInt   @unique
+  id_subkategori   String   @db.VarChar(255)  @unique
+  kategori_id      Int      @db.UnsignedInt
   nama             String   @db.VarChar(255)  @unique
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
-  kategori_id      Int      @db.UnsignedInt
-  kategori         Kategori @relation(fields: [kategori_id], references: [id_kategori], onUpdate: NoAction, onDelete:  Cascade)
+  kategori         Kategori @relation(fields: [kategori_id], references: [id_kategori], onUpdate: NoAction, onDelete:  Restrict)
 
   produk           Produk[]
 
@@ -48,15 +55,15 @@ model SubKategori {
 
 model Produk {
   id_table                Int           @id               @default(autoincrement())
-  kode_item               String        @unique           @db.VarChar(255)
-  barcode                 String?       @unique           @db.VarChar(255)
+  kode_item               String        @db.VarChar(255)  @unique           
+  barcode                 String?       @db.VarChar(255)  @unique           
   kode_pabrik             String?       @db.VarChar(255) 
   kode_toko               String?       @db.VarChar(255)
   kode_supplier           String?       @db.VarChar(255)
-  nama_produk             String        
-  nama_produk_asli        String?       
-  nama_produk_sebutan     String?       
-  subkategori_id          Int           @db.UnsignedInt
+  nama_produk             String        @db.VarChar(255) 
+  nama_produk_asli        String?       @db.VarChar(255)
+  nama_produk_sebutan     String?       @db.VarChar(255)
+  subkategori_id          String        @db.VarChar(255)
   merk                    String?       @db.VarChar(255)
   tipe                    String?       @db.VarChar(255)
   satuan_besar            String?       @db.VarChar(255)
@@ -70,13 +77,92 @@ model Produk {
   harga_4                 Int?          @db.UnsignedInt
   harga_5                 Int?          @db.UnsignedInt
   harga_6                 Int?          @db.UnsignedInt
+  harga_diskon            Int?          @db.UnsignedInt
   stok                    Int?          @db.UnsignedInt
+  stok_aman               Int?          @db.UnsignedInt
+  berat                   Int?          @db.UnsignedInt
+  volume                  Int?          @db.UnsignedInt
+  gudang_id               String        @db.VarChar(255)
+  rak                     String        @db.VarChar(255)
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
   subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Restrict)
+  gudang                  Gudang        @relation(fields: [gudang_id], references: [kode_gudang], onUpdate: NoAction, onDelete: Restrict)
 
   @@map("produk")        
 }
 
+model Gudang {
+  id_table                Int           @id               @default(autoincrement())
+  kode_gudang             String        @db.VarChar(255)  @unique             
+  nama                    String        @db.VarChar(255)  
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  produk                  Produk[]
+
+  @@map("gudang")
+}
+
+model Transaksi {
+  id_table                Int           @id               @default(autoincrement())
+  id_transaksi            String        @db.VarChar(255)  @unique           
+  keterangan              String?       @db.VarChar(255)
+  penerima                String?       @db.VarChar(255)
+  no_telp                 String?       @db.VarChar(255)
+  pengiriman              String?       @db.VarChar(255)
+  alamat                  String?       @db.VarChar(255)
+  ongkir                  Int?          @db.UnsignedInt
+  pajak                   Int?          @db.UnsignedInt
+  persen_pajak            Int?          @db.UnsignedInt
+  diskon                  Int?          @db.UnsignedInt
+  persen_diskon           Int?          @db.UnsignedInt
+  total_belanja           Int           @db.UnsignedInt
+  total_pembayaran        Int           @db.UnsignedInt
+  tunai                   Int           @db.UnsignedInt
+  kembalian               Int           @db.UnsignedInt
+  tipe                    String?       @db.VarChar(255)
+  unique_key              String?       @db.VarChar(255)
+  metode                  String?       @db.VarChar(255)
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  transaksidetail         TransaksiDetail[]
+  suratjalan              SuratJalan[]         
+
+  @@map("transaksi")
+}
+
+model TransaksiDetail {
+  id_table                Int           @id               @default(autoincrement())
+  transaksi_id            String        @db.VarChar(255)
+  jumlah                  Int           @db.UnsignedInt
+  satuan                  String        @db.VarChar(255)
+  nama_produk             String        @db.VarChar(255)
+  kode_item               String?       @db.VarChar(255)
+  gudang                  String?       @db.VarChar(255)
+  rak                     String?       @db.VarChar(255)
+  harga                   Int           @db.UnsignedInt
+  sub_total               Int           @db.UnsignedInt
+
+  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi], onUpdate: NoAction, onDelete: Restrict)
+
+  @@map("transaksidetail")
+}
+
+model SuratJalan {
+  id_table                Int           @id               @default(autoincrement())
+  id_suratjalan           String        @db.VarChar(255)  @unique           
+  transaksi_id            String        @db.VarChar(255)
+  nama_driver             String?       @db.VarChar(255)
+  kendaraan               String?       @db.VarChar(255)
+  plat_kendaraan          String?       @db.VarChar(255)
+  verifikasi              Boolean       @default(false)
+
+  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi])
+
+  @@map("suratjalan")
+}
 
