@@ -65,8 +65,6 @@ export class KategoriService {
         orderBy: {
           created_at: 'desc',
         },
-        take: size,
-        skip,
       }),
     ]);
 
