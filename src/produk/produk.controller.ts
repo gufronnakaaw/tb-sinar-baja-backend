@@ -4,13 +4,22 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Query,
   UsePipes,
 } from '@nestjs/common';
 import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
-import { CreateBulkProduk, ProdukQuery, createBulkProduk } from './produk.dto';
+import {
+  CreateBulkProduk,
+  ProdukQuery,
+  UpdateProdukDto,
+  UpdateStokProdukType,
+  createBulkProduk,
+  updateProdukSchema,
+  updateStokProdukSchema,
+} from './produk.dto';
 import { ProdukService } from './produk.service';
 
 @Controller('produk')
@@ -42,6 +51,40 @@ export class ProdukController {
       return {
         success: true,
         status_code: HttpStatus.CREATED,
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch()
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateProdukSchema))
+  async update(@Body() body: UpdateProdukDto): Promise<SuccessResponse> {
+    try {
+      const data = await this.produkService.updateProduk(body);
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('stok')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateStokProdukSchema))
+  async updateStok(
+    @Body() body: UpdateStokProdukType,
+  ): Promise<SuccessResponse> {
+    try {
+      const data = await this.produkService.updateStokProduk(body);
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
         data,
       };
     } catch (error) {

@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreateBulkProduk, ProdukQuery } from './produk.dto';
+import {
+  CreateBulkProduk,
+  ProdukQuery,
+  UpdateProdukDto,
+  UpdateStokProdukType,
+} from './produk.dto';
 
 @Injectable()
 export class ProdukService {
@@ -208,5 +213,55 @@ export class ProdukService {
       total_items: totalProduk,
       total_page: Math.ceil(totalProduk / size),
     };
+  }
+
+  updateProduk({ kode_item, ...props }: UpdateProdukDto) {
+    return this.prisma.produk.update({
+      where: {
+        kode_item: kode_item,
+      },
+      data: {
+        ...props,
+      },
+    });
+  }
+
+  updateStokProduk(body: UpdateStokProdukType) {
+    if (!body.tipe) {
+      return this.prisma.produk.update({
+        where: {
+          kode_item: body.kode_item,
+        },
+        data: {
+          stok_aman: body.stok_aman,
+        },
+      });
+    }
+
+    if (body.tipe == 'increment') {
+      return this.prisma.produk.update({
+        where: {
+          kode_item: body.kode_item,
+        },
+        data: {
+          stok: {
+            increment: body.stok,
+          },
+        },
+      });
+    }
+
+    if (body.tipe == 'decrement') {
+      return this.prisma.produk.update({
+        where: {
+          kode_item: body.kode_item,
+        },
+        data: {
+          stok: {
+            decrement: body.stok,
+          },
+        },
+      });
+    }
   }
 }
