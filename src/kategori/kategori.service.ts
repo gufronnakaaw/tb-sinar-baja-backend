@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../utils/services/prisma.service';
 import {
+  CreateBulkSubkategoriType,
   CreateKategoriType,
   CreateSubKategoriType,
   KategoriQuery,
@@ -223,5 +224,60 @@ export class KategoriService {
         updated_at: true,
       },
     });
+  }
+
+  async createBulkSubkategori(body: CreateBulkSubkategoriType) {
+    const kategori = await this.prisma.kategori.findUnique({
+      where: {
+        id_kategori: body.id_kategori,
+      },
+    });
+
+    if (!kategori) {
+      throw new NotFoundException('Kategori tidak ditemukan');
+    }
+
+    for (const subkategori of body.subkategori) {
+      const create = {};
+
+      const lastSubKategori = await this.prisma.subKategori.findMany({
+        where: {
+          kategori_id: body.id_kategori,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      if (lastSubKategori.length == 0) {
+        Object.assign(create, {
+          id_subkategori: `${body.id_kategori}-1`,
+          nama: subkategori.nama,
+          kategori_id: body.id_kategori,
+        });
+      }
+
+      if (
+        lastSubKategori.find(
+          (item) => item.nama.toLowerCase() == subkategori.nama.toLowerCase(),
+        )
+      ) {
+        throw new BadRequestException('Sub kategori sudah ada');
+      }
+
+      if (lastSubKategori.length > 0) {
+        const splitId = lastSubKategori[0].id_subkategori.split('-')[1];
+
+        Object.assign(create, {
+          id_subkategori: `${body.id_kategori}-${parseInt(splitId) + 1}`,
+          nama: subkategori.nama,
+          kategori_id: body.id_kategori,
+        });
+      }
+
+      await this.prisma.subKategori.create({
+        data: create,
+      });
+    }
   }
 }

@@ -12,11 +12,13 @@ import {
 import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
+  CreateBulkSubkategoriType,
   CreateKategoriType,
   CreateSubKategoriType,
   KategoriQuery,
   UpdateKategoriType,
   UpdateSubKategoriType,
+  createBulkSubkategori,
   createKategoriSchema,
   createSubKategoriSchema,
   updateKategoriSchema,
@@ -106,7 +108,23 @@ export class KategoriController {
         data: await this.kategoriService.updateSubKategori(body),
       };
     } catch (error) {
-      console.log(error);
+      throw error;
+    }
+  }
+
+  @Post('subkategori/bulk')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(createBulkSubkategori))
+  async createBulkSubkategori(
+    @Body() body: CreateBulkSubkategoriType,
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.CREATED,
+        data: await this.kategoriService.createBulkSubkategori(body),
+      };
+    } catch (error) {
       throw error;
     }
   }

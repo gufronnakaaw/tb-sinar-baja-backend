@@ -33,3 +33,16 @@ export type KategoriQuery = {
   page?: number;
   size?: number;
 };
+
+export const createBulkSubkategori = z.object({
+  id_kategori: z.number(),
+  subkategori: z
+    .array(
+      z.object({
+        nama: z.string().trim(),
+      }),
+    )
+    .min(1),
+});
+
+export type CreateBulkSubkategoriType = z.infer<typeof createBulkSubkategori>;
