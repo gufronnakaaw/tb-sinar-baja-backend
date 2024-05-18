@@ -4,6 +4,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { GudangModule } from './gudang/gudang.module';
 import { KategoriModule } from './kategori/kategori.module';
 import { ProdukModule } from './produk/produk.module';
+import { SuratjalanModule } from './suratjalan/suratjalan.module';
 import { TransaksiModule } from './transaksi/transaksi.module';
 
 @Module({
@@ -13,6 +14,7 @@ import { TransaksiModule } from './transaksi/transaksi.module';
     KategoriModule,
     GudangModule,
     DashboardModule,
+    SuratjalanModule,
   ],
   controllers: [AppController],
   providers: [],
