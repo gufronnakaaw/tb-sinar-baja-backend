@@ -63,7 +63,7 @@ export class KategoriService {
           updated_at: true,
         },
         orderBy: {
-          created_at: 'desc',
+          id_kategori: 'desc',
         },
       }),
     ]);
