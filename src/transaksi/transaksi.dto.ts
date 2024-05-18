@@ -6,7 +6,7 @@ export const createTransaksiSchema = z.object({
   no_telp: z.string().trim().optional(),
   pengiriman: z.string().trim().optional(),
   alamat: z.string().trim().optional(),
-  ongkir: z.number().positive().optional(),
+  ongkir: z.number().positive().optional().nullable(),
   pajak: z.number().positive().optional().nullable(),
   persen_pajak: z.number().positive().optional().nullable(),
   diskon: z.number().positive().optional().nullable(),
