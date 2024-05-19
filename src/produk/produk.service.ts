@@ -118,6 +118,7 @@ export class ProdukService {
             },
           ],
         },
+        take: 50,
       });
 
       return produk.map((item) => {
