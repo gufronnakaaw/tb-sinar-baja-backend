@@ -49,6 +49,14 @@ export class ProdukService {
     });
   }
 
+  getProdukByKodeItem(kode_item: string) {
+    return this.prisma.produk.findUnique({
+      where: {
+        kode_item,
+      },
+    });
+  }
+
   async getProduk({ search, ...props }: ProdukQuery) {
     const defaultPage = 1;
     const defaultSize = 10;
@@ -118,7 +126,7 @@ export class ProdukService {
             },
           ],
         },
-        take: 50,
+        take: 25,
       });
 
       return produk.map((item) => {

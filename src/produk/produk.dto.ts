@@ -4,6 +4,7 @@ export type ProdukQuery = {
   search?: string;
   page?: number;
   size?: number;
+  kode_item?: string;
 };
 
 export const createBulkProduk = z.object({

@@ -30,6 +30,17 @@ export class ProdukController {
   @HttpCode(HttpStatus.OK)
   async index(@Query() query: ProdukQuery): Promise<SuccessResponse> {
     try {
+      if (query.kode_item) {
+        const data = await this.produkService.getProdukByKodeItem(
+          query.kode_item,
+        );
+        return {
+          success: true,
+          status_code: HttpStatus.OK,
+          data,
+        };
+      }
+
       const data = await this.produkService.getProduk(query);
       return {
         success: true,
