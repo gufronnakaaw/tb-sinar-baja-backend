@@ -49,12 +49,41 @@ export class ProdukService {
     });
   }
 
-  getProdukByKodeItem(kode_item: string) {
-    return this.prisma.produk.findUnique({
+  async getProdukByKodeItem(kode_item: string) {
+    const produk = await this.prisma.produk.findUnique({
+      include: {
+        subkategori: {
+          select: {
+            nama: true,
+            kategori: {
+              select: {
+                nama: true,
+              },
+            },
+          },
+        },
+        gudang: {
+          select: {
+            nama: true,
+          },
+        },
+      },
       where: {
         kode_item,
       },
     });
+
+    const { subkategori } = produk;
+    delete produk.id_table;
+    delete produk.gudang_id;
+    delete produk.subkategori_id;
+
+    return {
+      ...produk,
+      subkategori: subkategori.nama,
+      kategori: subkategori.kategori.nama,
+      gudang: produk.gudang.nama,
+    };
   }
 
   async getProduk({ search, ...props }: ProdukQuery) {
