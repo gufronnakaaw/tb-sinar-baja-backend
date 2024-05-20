@@ -25,6 +25,7 @@ export class SuratjalanService {
               penerima: true,
               alamat: true,
               keterangan: true,
+              no_telp: true,
               transaksidetail: {
                 select: {
                   jumlah: true,
