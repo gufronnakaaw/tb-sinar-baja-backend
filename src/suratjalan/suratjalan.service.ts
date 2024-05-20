@@ -51,6 +51,9 @@ export class SuratjalanService {
         verifikasi: true,
         transaksi: {
           select: {
+            alamat: true,
+            keterangan: true,
+            no_telp: true,
             penerima: true,
             created_at: true,
           },
