@@ -23,6 +23,8 @@ export class SuratjalanService {
               id_transaksi: true,
               created_at: true,
               penerima: true,
+              alamat: true,
+              keterangan: true,
               transaksidetail: {
                 select: {
                   jumlah: true,
