@@ -62,7 +62,7 @@ export class SuratjalanService {
   }
 
   async updateSuratJalan(body: UpdateSuratJalanDto) {
-    const check = await this.prisma.suratJalan.count({
+    const check = await this.prisma.suratJalan.findUnique({
       where: {
         id_suratjalan: body.id_suratjalan,
       },
@@ -72,24 +72,49 @@ export class SuratjalanService {
       throw new NotFoundException('Surat jalan tidak ditemukan');
     }
 
-    return this.prisma.suratJalan.update({
+    const result = await this.prisma.transaksi.update({
       where: {
-        id_suratjalan: body.id_suratjalan,
+        id_transaksi: check.transaksi_id,
       },
       data: {
-        nama_driver: body.nama_driver,
-        kendaraan: body.kendaraan,
-        plat_kendaraan: body.plat_kendaraan,
-        verifikasi: body.verifikasi,
+        alamat: body.alamat,
+        keterangan: body.keterangan,
+        suratjalan: {
+          update: {
+            where: {
+              id_suratjalan: body.id_suratjalan,
+            },
+            data: {
+              nama_driver: body.nama_driver,
+              kendaraan: body.kendaraan,
+              plat_kendaraan: body.plat_kendaraan,
+              verifikasi: body.verifikasi,
+            },
+          },
+        },
       },
       select: {
-        id_suratjalan: true,
-        transaksi_id: true,
-        nama_driver: true,
-        kendaraan: true,
-        plat_kendaraan: true,
-        verifikasi: true,
+        alamat: true,
+        keterangan: true,
+        suratjalan: {
+          select: {
+            id_suratjalan: true,
+            transaksi_id: true,
+            nama_driver: true,
+            kendaraan: true,
+            plat_kendaraan: true,
+            verifikasi: true,
+          },
+        },
       },
     });
+
+    const { alamat, keterangan, suratjalan } = result;
+
+    return {
+      ...suratjalan[0],
+      alamat,
+      keterangan,
+    };
   }
 }

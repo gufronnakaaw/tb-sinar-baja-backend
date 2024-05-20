@@ -6,6 +6,8 @@ export type SuratJalanQuery = {
 
 export const updateSuratJalanSchema = z.object({
   id_suratjalan: z.string(),
+  keterangan: z.string().trim().optional(),
+  alamat: z.string().trim().optional(),
   nama_driver: z.string().trim().optional(),
   kendaraan: z.string().trim().optional(),
   plat_kendaraan: z.string().trim().optional(),
