@@ -85,6 +85,7 @@ export class SuratjalanService {
       data: {
         alamat: body.alamat,
         keterangan: body.keterangan,
+        no_telp: body.no_telp,
         suratjalan: {
           update: {
             where: {
@@ -102,6 +103,7 @@ export class SuratjalanService {
       select: {
         alamat: true,
         keterangan: true,
+        no_telp: true,
         suratjalan: {
           select: {
             id_suratjalan: true,
