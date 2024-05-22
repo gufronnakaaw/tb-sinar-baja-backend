@@ -7,19 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  owner
-  admin
-  cashier
-}
-
 model Pengguna {
   id_table         Int      @id               @default(autoincrement())
   nama             String   @db.VarChar(255)
   username         String   @db.VarChar(255)  @unique
   password_encrypt String   @db.VarChar(255)
   password_hash    String   @db.VarChar(255)
-  role             Role?
+  role             String   @db.VarChar(255)
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -89,6 +83,7 @@ model Produk {
 
   subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Restrict)
   gudang                  Gudang        @relation(fields: [gudang_id], references: [kode_gudang], onUpdate: NoAction, onDelete: Restrict)
+  pricelist               Pricelist[]
 
   @@map("produk")        
 }
@@ -166,3 +161,38 @@ model SuratJalan {
   @@map("suratjalan")
 }
 
+model Supplier {
+  id_table                Int           @id               @default(autoincrement())
+  id_supplier             String        @db.VarChar(255)  @unique           
+  nama                    String        @db.VarChar(255)           
+  email                   String        @db.VarChar(255)           
+  no_telp                 String        @db.VarChar(255)           
+  alamat_kantor           String        @db.Text           
+  alamat_gudang           String        @db.Text           
+  keterangan              String        @db.Text           
+  bank                    String        @db.VarChar(255)           
+  atas_nama               String        @db.VarChar(255)           
+  no_rekening             String        @db.VarChar(255)   
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  pricelist               Pricelist[]
+
+  @@map("supplier")
+}
+
+model Pricelist {
+  id_table                Int           @id               @default(autoincrement())
+  supplier_id             String
+  kode_item               String
+  harga                   Int           @db.UnsignedInt()
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier], onUpdate: NoAction, onDelete: Cascade)
+  produk                  Produk        @relation(fields: [kode_item], references: [kode_item], onUpdate: NoAction, onDelete: Cascade)
+
+  @@map("pricelist")
+}
