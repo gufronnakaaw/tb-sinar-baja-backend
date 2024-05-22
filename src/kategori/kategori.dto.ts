@@ -29,7 +29,7 @@ export type UpdateSubKategoriType = z.infer<typeof updateSubKategoriSchema>;
 
 export type KategoriQuery = {
   search?: string;
-  id?: string;
+  id_kategori?: string;
   page?: number;
   size?: number;
 };

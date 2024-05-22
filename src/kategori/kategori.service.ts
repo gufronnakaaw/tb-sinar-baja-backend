@@ -26,10 +26,10 @@ export class KategoriService {
 
     const skip = (page - 1) * size;
 
-    if (query.id) {
+    if (query.id_kategori) {
       const kategori = await this.prisma.kategori.findFirst({
         where: {
-          id_kategori: parseInt(query.id),
+          id_kategori: parseInt(query.id_kategori),
         },
         select: {
           id_kategori: true,
