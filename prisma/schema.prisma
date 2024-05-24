@@ -185,14 +185,14 @@ model Supplier {
 model Pricelist {
   id_table                Int           @id               @default(autoincrement())
   supplier_id             String
-  kode_item               String
+  produk_id               String
   harga                   Int           @db.UnsignedInt()
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
   supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier], onUpdate: NoAction, onDelete: Cascade)
-  produk                  Produk        @relation(fields: [kode_item], references: [kode_item], onUpdate: NoAction, onDelete: Cascade)
+  produk                  Produk        @relation(fields: [produk_id], references: [kode_item], onUpdate: NoAction, onDelete: Cascade)
 
   @@map("pricelist")
 }
