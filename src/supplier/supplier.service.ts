@@ -202,22 +202,18 @@ export class SupplierService {
       },
     });
 
-    return {
-      id_supplier: results[0].supplier.id_supplier,
-      nama: results[0].supplier.nama,
-      produk: results.map((item) => {
-        const { harga, created_at, updated_at, produk } = item;
+    return results.map((item) => {
+      const { harga, created_at, updated_at, produk } = item;
 
-        return {
-          nama: produk.nama_produk,
-          kode_item: produk.kode_item,
-          kategori: `${produk.subkategori.kategori.nama} - ${produk.subkategori.nama}`,
-          harga,
-          created_at,
-          updated_at,
-        };
-      }),
-    };
+      return {
+        nama: produk.nama_produk,
+        kode_item: produk.kode_item,
+        kategori: `${produk.subkategori.kategori.nama} - ${produk.subkategori.nama}`,
+        harga,
+        created_at,
+        updated_at,
+      };
+    });
   }
 
   async createPricelist(body: CreateSupplierPricelistDto) {
