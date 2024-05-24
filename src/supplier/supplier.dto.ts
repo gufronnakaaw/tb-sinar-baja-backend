@@ -28,3 +28,27 @@ export const updateSupplierSchema = z.object({
 });
 
 export type UpdateSupplierDto = z.infer<typeof updateSupplierSchema>;
+
+export type SupplierPricelistQuery = {
+  id_supplier: string;
+};
+
+export const createSupplierPricelistSchema = z.object({
+  supplier_id: z.string(),
+  harga: z.number(),
+  produk_id: z.string(),
+});
+
+export type CreateSupplierPricelistDto = z.infer<
+  typeof createSupplierPricelistSchema
+>;
+
+export const updateSupplierPricelistSchema = z.object({
+  supplier_id: z.string(),
+  produk_id: z.string().optional(),
+  harga: z.number().optional(),
+});
+
+export type UpdateSupplierPricelistDto = z.infer<
+  typeof updateSupplierPricelistSchema
+>;
