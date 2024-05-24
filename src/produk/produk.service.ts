@@ -86,6 +86,45 @@ export class ProdukService {
     };
   }
 
+  async getProdukBySubkategori(id_subkategori: string) {
+    const produk = await this.prisma.produk.findMany({
+      include: {
+        subkategori: {
+          select: {
+            nama: true,
+            kategori: {
+              select: {
+                nama: true,
+              },
+            },
+          },
+        },
+        gudang: {
+          select: {
+            nama: true,
+          },
+        },
+      },
+      where: {
+        subkategori_id: id_subkategori,
+      },
+    });
+
+    return produk.map((item) => {
+      const { subkategori } = item;
+      delete item.id_table;
+      delete item.gudang_id;
+      delete item.subkategori_id;
+
+      return {
+        ...item,
+        subkategori: subkategori.nama,
+        kategori: subkategori.kategori.nama,
+        gudang: item.gudang.nama,
+      };
+    });
+  }
+
   async getProduk({ search, ...props }: ProdukQuery) {
     const defaultPage = 1;
     const defaultSize = 10;

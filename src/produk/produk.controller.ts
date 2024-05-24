@@ -41,6 +41,17 @@ export class ProdukController {
         };
       }
 
+      if (query.id_subkategori) {
+        const data = await this.produkService.getProdukBySubkategori(
+          query.id_subkategori,
+        );
+        return {
+          success: true,
+          status_code: HttpStatus.OK,
+          data,
+        };
+      }
+
       const data = await this.produkService.getProduk(query);
       return {
         success: true,
