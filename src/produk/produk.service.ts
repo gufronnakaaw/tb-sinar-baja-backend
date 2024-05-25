@@ -188,7 +188,7 @@ export class ProdukService {
               },
             },
             {
-              harga_4: {
+              harga_6: {
                 gt: 0,
               },
             },
