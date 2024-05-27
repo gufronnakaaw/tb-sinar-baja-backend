@@ -196,3 +196,12 @@ model Pricelist {
 
   @@map("pricelist")
 }
+
+model Setting {
+  id_table                Int           @id               @default(autoincrement())
+  field                   String
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  @@map("setting")
+}
