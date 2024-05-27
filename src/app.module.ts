@@ -8,6 +8,7 @@ import { ProdukModule } from './produk/produk.module';
 import { SuratjalanModule } from './suratjalan/suratjalan.module';
 import { TransaksiModule } from './transaksi/transaksi.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { SettingModule } from './setting/setting.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SupplierModule } from './supplier/supplier.module';
     SuratjalanModule,
     PenggunaModule,
     SupplierModule,
+    SettingModule,
   ],
   controllers: [AppController],
   providers: [],
