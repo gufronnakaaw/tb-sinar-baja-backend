@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
+import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 import { ErrorResponse } from './global.response';
 
@@ -59,6 +60,46 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       };
 
       return httpAdapter.reply(ctx.getResponse(), responseBody, BAD_REQUEST);
+    }
+
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      const responseBody: ErrorResponse = {
+        success: false,
+        status_code: INTERNAL_SERVER_ERROR,
+        error: {
+          name: exception.name,
+          message: exception.message,
+          errors: {
+            code: exception.code,
+            meta: exception.meta?.target,
+            stack: exception.stack,
+          },
+        },
+      };
+
+      return httpAdapter.reply(
+        ctx.getResponse(),
+        responseBody,
+        INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    if (exception instanceof Prisma.PrismaClientUnknownRequestError) {
+      const responseBody: ErrorResponse = {
+        success: false,
+        status_code: INTERNAL_SERVER_ERROR,
+        error: {
+          name: exception.name,
+          message: exception.message,
+          errors: null,
+        },
+      };
+
+      return httpAdapter.reply(
+        ctx.getResponse(),
+        responseBody,
+        INTERNAL_SERVER_ERROR,
+      );
     }
 
     if (exception instanceof Error) {
