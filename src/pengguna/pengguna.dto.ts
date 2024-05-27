@@ -23,3 +23,10 @@ export const updatePenggunaSchema = z.object({
 });
 
 export type UpdatePenggunaDto = z.infer<typeof updatePenggunaSchema>;
+
+export const loginPenggunaSchema = z.object({
+  username: z.string().trim(),
+  password: z.string().trim(),
+});
+
+export type LoginPenggunaDto = z.infer<typeof loginPenggunaSchema>;

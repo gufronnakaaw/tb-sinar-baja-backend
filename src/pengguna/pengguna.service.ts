@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { hashPassword } from 'src/utils/bcrypt.util';
+import { hashPassword, verifyPassword } from '../utils/bcrypt.util';
 import { decryptPassword, encryptPassword } from '../utils/crypto.util';
 import { PrismaService } from '../utils/services/prisma.service';
 import {
   CreatePenggunaDto,
+  LoginPenggunaDto,
   PenggunaQuery,
   UpdatePenggunaDto,
 } from './pengguna.dto';
@@ -156,5 +157,26 @@ export class PenggunaService {
         created_at: true,
       },
     });
+  }
+
+  async loginPengguna({ username, password }: LoginPenggunaDto) {
+    const pengguna = await this.prisma.pengguna.findUnique({
+      where: {
+        username,
+      },
+    });
+
+    if (!pengguna) {
+      throw new BadRequestException('Username atau password salah');
+    }
+
+    if (!(await verifyPassword(password, pengguna.password_hash))) {
+      throw new BadRequestException('Username atau password salah');
+    }
+
+    return {
+      nama: pengguna.nama,
+      role: pengguna.role.split(','),
+    };
   }
 }

@@ -15,9 +15,11 @@ import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
   CreatePenggunaDto,
+  LoginPenggunaDto,
   PenggunaQuery,
   UpdatePenggunaDto,
   createPenggunaSchema,
+  loginPenggunaSchema,
   updatePenggunaSchema,
 } from './pengguna.dto';
 import { PenggunaService } from './pengguna.service';
@@ -94,6 +96,21 @@ export class PenggunaController {
         success: true,
         status_code: HttpStatus.OK,
         data: await this.penggunaService.deletePengguna(username),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(loginPenggunaSchema))
+  async login(@Body() body: LoginPenggunaDto): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.penggunaService.loginPengguna(body),
       };
     } catch (error) {
       throw error;
