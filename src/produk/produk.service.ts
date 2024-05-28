@@ -192,11 +192,6 @@ export class ProdukService {
                 gt: 0,
               },
             },
-            {
-              harga_6: {
-                gt: 0,
-              },
-            },
           ],
         },
         take: 25,
