@@ -63,6 +63,23 @@ export class ProdukController {
     }
   }
 
+  @Get('export')
+  @HttpCode(HttpStatus.OK)
+  async export(
+    @Query() query: { id_kategori: string },
+  ): Promise<SuccessResponse> {
+    try {
+      const data = await this.produkService.export(parseInt(query.id_kategori));
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Post('bulk')
   @UsePipes(new ZodValidationPipe(createBulkProduk))
   @HttpCode(HttpStatus.CREATED)

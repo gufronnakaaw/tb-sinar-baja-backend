@@ -341,4 +341,32 @@ export class ProdukService {
       });
     }
   }
+
+  async export(id_kategori: number) {
+    const produk = await this.prisma.subKategori.findMany({
+      where: {
+        kategori_id: id_kategori,
+      },
+      include: {
+        produk: true,
+      },
+    });
+
+    const result = [];
+    for (const item of produk) {
+      result.push(
+        ...item.produk.map((element) => {
+          delete element.id_table;
+          delete element.created_at;
+          delete element.updated_at;
+
+          return {
+            ...element,
+          };
+        }),
+      );
+    }
+
+    return result;
+  }
 }
