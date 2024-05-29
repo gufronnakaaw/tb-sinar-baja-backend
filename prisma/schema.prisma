@@ -205,3 +205,31 @@ model Setting {
 
   @@map("setting")
 }
+
+model Level {
+  id_table                Int           @id               @default(autoincrement())
+  id_level                String        @db.VarChar(255)  @unique             
+  nama                    String        @db.VarChar(255)  
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  Member                  Member[]
+
+  @@map("level")
+}
+
+model Member {
+  id_table                Int           @id               @default(autoincrement())
+  id_member               String        @db.VarChar(255)  @unique             
+  level_id                String
+  nama                    String        @db.VarChar(255)  
+  perusahaan              String?       @db.VarChar(255)  
+  alamat                  String?       @db.VarChar(255)  
+  email                   String?       @db.VarChar(255)  
+  no_telp                 String?       @db.VarChar(255)  
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  level                   Level         @relation(fields: [level_id], references: [id_level])
+  @@map("member")
+}
