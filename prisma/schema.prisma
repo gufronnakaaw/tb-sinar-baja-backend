@@ -230,6 +230,6 @@ model Member {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  level                   Level         @relation(fields: [level_id], references: [id_level])
+  level                   Level         @relation(fields: [level_id], references: [id_level], onUpdate: NoAction, onDelete: Cascade)
   @@map("member")
 }
