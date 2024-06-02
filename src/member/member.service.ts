@@ -10,8 +10,8 @@ import { CreateMemberDto, UpdateMemberDto } from './member.dto';
 export class MemberService {
   constructor(private prisma: PrismaService) {}
 
-  getMember() {
-    return this.prisma.member.findMany({
+  async getMember() {
+    const member = await this.prisma.member.findMany({
       select: {
         id_member: true,
         nama: true,
@@ -30,6 +30,16 @@ export class MemberService {
       orderBy: {
         created_at: 'desc',
       },
+    });
+
+    return member.map((item) => {
+      const { level } = item;
+      delete item.level;
+
+      return {
+        ...item,
+        level: level.nama,
+      };
     });
   }
 
