@@ -11,6 +11,7 @@ import { SettingModule } from './setting/setting.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { SuratjalanModule } from './suratjalan/suratjalan.module';
 import { TransaksiModule } from './transaksi/transaksi.module';
+import { PenawaranModule } from './penawaran/penawaran.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TransaksiModule } from './transaksi/transaksi.module';
     SettingModule,
     LevelModule,
     MemberModule,
+    PenawaranModule,
   ],
   controllers: [AppController],
   providers: [],
