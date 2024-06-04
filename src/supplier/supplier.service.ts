@@ -187,6 +187,13 @@ export class SupplierService {
           select: {
             nama_produk: true,
             kode_item: true,
+            satuan_besar: true,
+            satuan_kecil: true,
+            isi_satuan_besar: true,
+            kode_pabrik: true,
+            merk: true,
+            nama_produk_asli: true,
+            nama_produk_sebutan: true,
             subkategori: {
               select: {
                 nama: true,
@@ -200,15 +207,19 @@ export class SupplierService {
           },
         },
       },
+      orderBy: {
+        created_at: 'desc',
+      },
     });
 
     return results.map((item) => {
       const { harga, created_at, updated_at, produk } = item;
+      const { subkategori } = produk;
+      delete produk.subkategori;
 
       return {
-        nama: produk.nama_produk,
-        kode_item: produk.kode_item,
-        kategori: `${produk.subkategori.kategori.nama} - ${produk.subkategori.nama}`,
+        ...produk,
+        kategori: `${subkategori.kategori.nama} - ${subkategori.nama}`,
         harga,
         created_at,
         updated_at,
