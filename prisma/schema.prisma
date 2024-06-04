@@ -178,6 +178,7 @@ model Supplier {
   updated_at              DateTime      @updatedAt
 
   pricelist               Pricelist[]
+  penawaran               Penawaran[]
 
   @@map("supplier")
 }
@@ -232,4 +233,33 @@ model Member {
 
   level                   Level         @relation(fields: [level_id], references: [id_level], onUpdate: NoAction, onDelete: Cascade)
   @@map("member")
+}
+
+model Penawaran {
+  id_table                Int           @id               @default(autoincrement())
+  id_penawaran            String        @db.VarChar(255)  @unique
+  supplier_id             String
+  status                  String        @default("pending")
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt  
+
+  supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier])   
+  penawarandetail         PenawaranDetail[]    
+
+  @@map("penawaran")
+}
+
+model PenawaranDetail {
+  id_table                Int           @id               @default(autoincrement())
+  penawaran_id            String        @db.VarChar(255) 
+  kode_pabrik             String        @db.VarChar(255) 
+  nama_produk             String        @db.VarChar(255) 
+  qty                     Int
+  satuan                  String        @db.VarChar(20) 
+  harga                   Int
+  jumlah                  Int
+
+  penawaran               Penawaran     @relation(fields: [penawaran_id], references: [id_penawaran])
+
+  @@map("penawarandetail")
 }
