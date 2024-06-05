@@ -41,7 +41,7 @@ export class ProdukService {
         satuan_besar: item.satuan_besar,
         satuan_kecil: item.satuan_kecil,
         tipe: item.tipe,
-        subkategori_id: item.sub_kategori_produk,
+        subkategori_id: item.subkategori_id,
       };
 
       await this.prisma.produk.upsert({
@@ -134,8 +134,12 @@ export class ProdukService {
     const defaultPage = 1;
     const defaultSize = 10;
 
-    const page = parseInt(props.page) ? parseInt(props.page) : defaultPage;
-    const size = parseInt(props.size) ? parseInt(props.size) : defaultSize;
+    const page = parseInt(`${props.page}`)
+      ? parseInt(`${props.page}`)
+      : defaultPage;
+    const size = parseInt(`${props.size}`)
+      ? parseInt(`${props.size}`)
+      : defaultSize;
 
     const skip = (page - 1) * size;
 
@@ -342,31 +346,88 @@ export class ProdukService {
     }
   }
 
-  async export(id_kategori: number) {
-    const produk = await this.prisma.subKategori.findMany({
+  async filter(id_kategori: number) {
+    const result = await this.prisma.kategori.findUnique({
       where: {
-        kategori_id: id_kategori,
+        id_kategori,
       },
       include: {
-        produk: true,
+        subkategori: {
+          include: {
+            produk: true,
+          },
+        },
       },
     });
 
-    const result = [];
-    for (const item of produk) {
-      result.push(
+    // const result = [];
+    // for (const item of produk) {
+    //   result.push(
+    //     ...item.produk.map((element) => {
+    //       delete element.id_table;
+    //       delete element.created_at;
+    //       delete element.updated_at;
+
+    //       return {
+    //         ...element,
+    //       };
+    //     }),
+    //   );
+    // }
+
+    const { nama, subkategori } = result;
+
+    const produk = [];
+
+    for (const item of subkategori) {
+      produk.push(
         ...item.produk.map((element) => {
+          const { subkategori_id, gudang_id } = element;
           delete element.id_table;
           delete element.created_at;
           delete element.updated_at;
+          delete element.subkategori_id;
+          delete element.gudang_id;
 
           return {
-            ...element,
+            nama_sub_kategori_produk: item.nama,
+            sub_kategori_produk: subkategori_id,
+            merk: element.merk,
+            nama_produk: element.nama_produk,
+            kode_item: element.kode_item,
+            nama_produk_asli: element.nama_produk_asli,
+            kode_supplier: element.kode_supplier,
+            satuan_kecil: element.satuan_kecil,
+            satuan_besar: element.satuan_besar,
+            isi_satuan_besar: element.isi_satuan_besar,
+            harga_pokok: !element.harga_pokok ? 0 : element.harga_pokok,
+            harga_1: !element.harga_1 ? 0 : element.harga_1,
+            harga_2: !element.harga_2 ? 0 : element.harga_2,
+            harga_3: !element.harga_3 ? 0 : element.harga_3,
+            harga_4: !element.harga_4 ? 0 : element.harga_4,
+            harga_5: !element.harga_5 ? 0 : element.harga_5,
+            harga_6: !element.harga_6 ? 0 : element.harga_6,
+            gudang: gudang_id,
+            rak: element.rak,
+            stok: element.stok,
+            stok_aman: element.stok_aman,
+            nama_produk_sebutan: element.nama_produk_sebutan,
+            konversi: element.konversi,
+            berat: element.berat,
+            volume: element.volume,
+            tipe: element.tipe,
+            barcode: element.barcode,
+            kode_pabrik: element.kode_pabrik,
+            kode_toko: element.kode_toko,
           };
         }),
       );
     }
 
-    return result;
+    return {
+      id_kategori: result.id_kategori,
+      nama,
+      produk,
+    };
   }
 }

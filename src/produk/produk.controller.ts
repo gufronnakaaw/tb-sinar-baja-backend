@@ -63,13 +63,13 @@ export class ProdukController {
     }
   }
 
-  @Get('export')
+  @Get('filter')
   @HttpCode(HttpStatus.OK)
-  async export(
+  async filter(
     @Query() query: { id_kategori: string },
   ): Promise<SuccessResponse> {
     try {
-      const data = await this.produkService.export(parseInt(query.id_kategori));
+      const data = await this.produkService.filter(parseInt(query.id_kategori));
       return {
         success: true,
         status_code: HttpStatus.OK,
