@@ -17,4 +17,4 @@ jobs:
             cd /home/rodaharapansemesta/tb-sinar-baja-backend
             git status
             npm run build
-            pm2 restart ${{ secrets.APPNAME }}
+            pm2 restart sb-be
