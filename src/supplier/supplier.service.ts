@@ -175,6 +175,7 @@ export class SupplierService {
       },
       select: {
         harga: true,
+        harga_grosir: true,
         created_at: true,
         updated_at: true,
         supplier: {
@@ -242,6 +243,7 @@ export class SupplierService {
       data: {
         supplier_id: body.supplier_id,
         harga: body.harga,
+        harga_grosir: body.harga_grosir,
         produk_id: body.produk_id,
       },
     });
@@ -266,6 +268,7 @@ export class SupplierService {
         produk_id: body.produk_id,
       },
       data: {
+        harga_grosir: body.harga_grosir,
         harga: body.harga,
       },
     });

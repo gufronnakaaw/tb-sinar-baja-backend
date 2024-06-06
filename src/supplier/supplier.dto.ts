@@ -36,6 +36,7 @@ export type SupplierPricelistQuery = {
 export const createSupplierPricelistSchema = z.object({
   supplier_id: z.string(),
   harga: z.number(),
+  harga_grosir: z.number(),
   produk_id: z.string(),
 });
 
@@ -47,6 +48,7 @@ export const updateSupplierPricelistSchema = z.object({
   supplier_id: z.string(),
   produk_id: z.string().optional(),
   harga: z.number().optional(),
+  harga_grosir: z.number().optional(),
 });
 
 export type UpdateSupplierPricelistDto = z.infer<
