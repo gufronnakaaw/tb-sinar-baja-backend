@@ -188,6 +188,7 @@ model Pricelist {
   supplier_id             String
   produk_id               String
   harga                   Int           @db.UnsignedInt()
+  harga_grosir            Int           @db.UnsignedInt() @default(0)
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
@@ -252,12 +253,12 @@ model Penawaran {
 model PenawaranDetail {
   id_table                Int           @id               @default(autoincrement())
   penawaran_id            String        @db.VarChar(255) 
-  kode_pabrik             String        @db.VarChar(255) 
+  kode_pabrik             String?       @db.VarChar(255) 
   nama_produk             String        @db.VarChar(255) 
   qty                     Int
   satuan                  String        @db.VarChar(20) 
-  harga                   Int
-  jumlah                  Int
+  harga                   Int?
+  jumlah                  Int?
 
   penawaran               Penawaran     @relation(fields: [penawaran_id], references: [id_penawaran])
 
