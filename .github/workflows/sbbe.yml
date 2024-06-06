@@ -1,4 +1,4 @@
-name: SBKFE
+name: SBBE
 on:
   push:
     branches: ['main']
@@ -17,5 +17,6 @@ jobs:
             cd /home/rodaharapansemesta/tb-sinar-baja-backend
             git pull
             git status
+            npx prisma generate
             npm run build
             pm2 restart sb-be
