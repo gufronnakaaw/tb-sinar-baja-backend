@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../utils/services/prisma.service';
 import {
+  CreateBankDto,
   CreateSupplierDto,
   CreateSupplierPricelistDto,
   SupplierPricelistQuery,
@@ -26,9 +27,16 @@ export class SupplierService {
         alamat_gudang: true,
         alamat_kantor: true,
         keterangan: true,
-        bank: true,
-        atas_nama: true,
-        no_rekening: true,
+        supplierbank: {
+          select: {
+            id_table: true,
+            nama: true,
+            atas_nama: true,
+            no_rekening: true,
+            created_at: true,
+            updated_at: true,
+          },
+        },
         created_at: true,
         updated_at: true,
       },
@@ -36,6 +44,59 @@ export class SupplierService {
         created_at: 'desc',
       },
     });
+  }
+
+  getSupplierBank(id_supplier: string) {
+    return this.prisma.supplierBank.findMany({
+      where: {
+        supplier_id: id_supplier,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+
+  async createSupplierBank(body: CreateBankDto) {
+    if (
+      !(await this.prisma.supplier.count({
+        where: {
+          id_supplier: body.id_supplier,
+        },
+      }))
+    ) {
+      throw new NotFoundException('Supplier tidak ditemukan');
+    }
+
+    return this.prisma.supplierBank.create({
+      data: {
+        supplier_id: body.id_supplier,
+        nama: body.nama,
+        atas_nama: body.atas_nama,
+        no_rekening: body.no_rekening,
+      },
+    });
+  }
+
+  async deleteSupplierBank(params: { supplier_id: string; id_table: string }) {
+    const supplier = await this.prisma.supplier.count({
+      where: {
+        id_supplier: params.supplier_id,
+      },
+    });
+
+    if (!supplier) {
+      throw new NotFoundException('Supplier tidak ditemukan');
+    }
+
+    await this.prisma.supplierBank.delete({
+      where: {
+        supplier_id: params.supplier_id,
+        id_table: parseInt(params.id_table),
+      },
+    });
+
+    return params;
   }
 
   async createSupplier(body: CreateSupplierDto) {
@@ -55,9 +116,17 @@ export class SupplierService {
           alamat_gudang: body.alamat_gudang,
           alamat_kantor: body.alamat_kantor,
           keterangan: body.keterangan,
-          bank: body.bank,
-          atas_nama: body.atas_nama,
-          no_rekening: body.no_rekening,
+          supplierbank: {
+            createMany: {
+              data: body.bank.map((item) => {
+                return {
+                  nama: item.nama,
+                  atas_nama: item.atas_nama,
+                  no_rekening: item.no_rekening,
+                };
+              }),
+            },
+          },
         },
       });
       return body;
@@ -82,9 +151,17 @@ export class SupplierService {
         alamat_gudang: body.alamat_gudang,
         alamat_kantor: body.alamat_kantor,
         keterangan: body.keterangan,
-        bank: body.bank,
-        atas_nama: body.atas_nama,
-        no_rekening: body.no_rekening,
+        supplierbank: {
+          createMany: {
+            data: body.bank.map((item) => {
+              return {
+                nama: item.nama,
+                atas_nama: item.atas_nama,
+                no_rekening: item.no_rekening,
+              };
+            }),
+          },
+        },
       },
     });
 
@@ -102,28 +179,16 @@ export class SupplierService {
       throw new NotFoundException('Supplier tidak ditemukan');
     }
 
-    return this.prisma.supplier.update({
+    await this.prisma.supplier.update({
       where: {
         id_supplier: body.id_supplier,
       },
       data: {
         ...body,
       },
-      select: {
-        id_supplier: true,
-        nama: true,
-        email: true,
-        no_telp: true,
-        alamat_gudang: true,
-        alamat_kantor: true,
-        keterangan: true,
-        bank: true,
-        atas_nama: true,
-        no_rekening: true,
-        created_at: true,
-        updated_at: true,
-      },
     });
+
+    return body;
   }
 
   async deleteSupplier(id_supplier: string) {
@@ -140,20 +205,6 @@ export class SupplierService {
     return this.prisma.supplier.delete({
       where: {
         id_supplier,
-      },
-      select: {
-        id_supplier: true,
-        nama: true,
-        email: true,
-        no_telp: true,
-        alamat_gudang: true,
-        alamat_kantor: true,
-        keterangan: true,
-        bank: true,
-        atas_nama: true,
-        no_rekening: true,
-        created_at: true,
-        updated_at: true,
       },
     });
   }
@@ -178,12 +229,6 @@ export class SupplierService {
         harga_grosir: true,
         created_at: true,
         updated_at: true,
-        supplier: {
-          select: {
-            id_supplier: true,
-            nama: true,
-          },
-        },
         produk: {
           select: {
             nama_produk: true,
@@ -238,6 +283,17 @@ export class SupplierService {
 
     if (!supplier) {
       throw new NotFoundException('Supplier tidak ditemukan');
+    }
+
+    if (
+      await this.prisma.pricelist.count({
+        where: {
+          supplier_id: body.supplier_id,
+          produk_id: body.produk_id,
+        },
+      })
+    ) {
+      throw new BadRequestException('Produk sudah ada');
     }
 
     await this.prisma.pricelist.create({

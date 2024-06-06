@@ -14,11 +14,13 @@ import {
 import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
+  CreateBankDto,
   CreateSupplierDto,
   CreateSupplierPricelistDto,
   SupplierPricelistQuery,
   UpdateSupplierDto,
   UpdateSupplierPricelistDto,
+  createBankSchema,
   createSupplierPricelistSchema,
   createSupplierSchema,
   updateSupplierPricelistSchema,
@@ -84,6 +86,53 @@ export class SupplierController {
         success: true,
         status_code: HttpStatus.OK,
         data: await this.supplierService.deleteSupplier(id_supplier),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('bank')
+  @HttpCode(HttpStatus.OK)
+  async getBank(
+    @Query() query: SupplierPricelistQuery,
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.supplierService.getSupplierBank(query.id_supplier),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('bank')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(createBankSchema))
+  async createBank(@Body() body: CreateBankDto): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.CREATED,
+        data: await this.supplierService.createSupplierBank(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete('bank/:supplier_id/:id_table')
+  @HttpCode(HttpStatus.OK)
+  async destroyBank(
+    @Param() params: { supplier_id: string; id_table: string },
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.supplierService.deleteSupplierBank(params),
       };
     } catch (error) {
       throw error;

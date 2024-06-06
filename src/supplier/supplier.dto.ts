@@ -7,9 +7,13 @@ export const createSupplierSchema = z.object({
   alamat_kantor: z.string(),
   alamat_gudang: z.string(),
   keterangan: z.string(),
-  bank: z.string(),
-  atas_nama: z.string(),
-  no_rekening: z.string(),
+  bank: z.array(
+    z.object({
+      nama: z.string(),
+      atas_nama: z.string(),
+      no_rekening: z.string(),
+    }),
+  ),
 });
 
 export type CreateSupplierDto = z.infer<typeof createSupplierSchema>;
@@ -22,9 +26,6 @@ export const updateSupplierSchema = z.object({
   alamat_kantor: z.string().optional(),
   alamat_gudang: z.string().optional(),
   keterangan: z.string().optional(),
-  bank: z.string().optional(),
-  atas_nama: z.string().optional(),
-  no_rekening: z.string().optional(),
 });
 
 export type UpdateSupplierDto = z.infer<typeof updateSupplierSchema>;
@@ -32,6 +33,15 @@ export type UpdateSupplierDto = z.infer<typeof updateSupplierSchema>;
 export type SupplierPricelistQuery = {
   id_supplier: string;
 };
+
+export const createBankSchema = z.object({
+  id_supplier: z.string(),
+  nama: z.string(),
+  atas_nama: z.string(),
+  no_rekening: z.string(),
+});
+
+export type CreateBankDto = z.infer<typeof createBankSchema>;
 
 export const createSupplierPricelistSchema = z.object({
   supplier_id: z.string(),
