@@ -170,17 +170,29 @@ model Supplier {
   alamat_kantor           String        @db.Text           
   alamat_gudang           String        @db.Text           
   keterangan              String        @db.Text           
-  bank                    String        @db.VarChar(255)           
-  atas_nama               String        @db.VarChar(255)           
-  no_rekening             String        @db.VarChar(255)   
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
   pricelist               Pricelist[]
-  penawaran               Penawaran[]
+  supplierbank            SupplierBank[]
 
   @@map("supplier")
+}
+
+model SupplierBank {
+  id_table                Int           @id               @default(autoincrement())
+  supplier_id             String
+  nama                    String        @db.VarChar(255)           
+  atas_nama               String        @db.VarChar(255)           
+  no_rekening             String        @db.VarChar(255)
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier], onDelete: Cascade)
+
+  @@map("supplierbank")
 }
 
 model Pricelist {
@@ -193,8 +205,8 @@ model Pricelist {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier], onUpdate: NoAction, onDelete: Cascade)
-  produk                  Produk        @relation(fields: [produk_id], references: [kode_item], onUpdate: NoAction, onDelete: Cascade)
+  supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier], onDelete: Cascade)
+  produk                  Produk        @relation(fields: [produk_id], references: [kode_item], onDelete: Cascade)
 
   @@map("pricelist")
 }
@@ -240,11 +252,14 @@ model Penawaran {
   id_table                Int           @id               @default(autoincrement())
   id_penawaran            String        @db.VarChar(255)  @unique
   supplier_id             String
+  nama_supplier           String?       @db.VarChar(255)           
+  email_supplier          String?       @db.VarChar(255)           
+  no_telp                 String?       @db.VarChar(255)           
+  alamat                  String?       @db.Text      
   status                  String        @default("pending")
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt  
-
-  supplier                Supplier      @relation(fields: [supplier_id], references: [id_supplier])   
+  
   penawarandetail         PenawaranDetail[]    
 
   @@map("penawaran")
