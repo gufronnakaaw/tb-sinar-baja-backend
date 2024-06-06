@@ -214,7 +214,7 @@ export class SupplierService {
     });
 
     return results.map((item) => {
-      const { harga, created_at, updated_at, produk } = item;
+      const { harga, created_at, updated_at, produk, harga_grosir } = item;
       const { subkategori } = produk;
       delete produk.subkategori;
 
@@ -222,6 +222,7 @@ export class SupplierService {
         ...produk,
         kategori: `${subkategori.kategori.nama} - ${subkategori.nama}`,
         harga,
+        harga_grosir,
         created_at,
         updated_at,
       };
