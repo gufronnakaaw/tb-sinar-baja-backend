@@ -7,30 +7,21 @@ import { CreatePenawaranDto, UpdateStatusPenawaranDto } from './penawaran.dto';
 export class PenawaranService {
   constructor(private prisma: PrismaService) {}
 
-  async getPenawaran() {
-    const result = await this.prisma.penawaran.findMany({
+  getPenawaran() {
+    return this.prisma.penawaran.findMany({
       select: {
         id_penawaran: true,
+        supplier_id: true,
+        nama_supplier: true,
+        email_supplier: true,
+        no_telp: true,
+        alamat: true,
         status: true,
-        supplier: {
-          select: {
-            nama: true,
-            id_supplier: true,
-          },
-        },
         created_at: true,
       },
       orderBy: {
         created_at: 'desc',
       },
-    });
-
-    return result.map((item) => {
-      return {
-        ...item,
-        id_supplier: item.supplier.id_supplier,
-        supplier: item.supplier.nama,
-      };
     });
   }
 
@@ -41,18 +32,15 @@ export class PenawaranService {
       },
       select: {
         id_penawaran: true,
+        supplier_id: true,
+        nama_supplier: true,
+        email_supplier: true,
+        no_telp: true,
+        alamat: true,
         status: true,
-        supplier: {
-          select: {
-            id_supplier: true,
-            nama: true,
-            alamat_kantor: true,
-            no_telp: true,
-            email: true,
-          },
-        },
         penawarandetail: {
           select: {
+            kode_item: true,
             kode_pabrik: true,
             nama_produk: true,
             qty: true,
@@ -65,22 +53,31 @@ export class PenawaranService {
       },
     });
 
-    const { supplier, created_at, penawarandetail, status } = result;
+    const { penawarandetail } = result;
+    delete result.penawarandetail;
 
     return {
-      id_penawaran: result.id_penawaran,
-      ...supplier,
-      status,
+      ...result,
       produk: penawarandetail,
-      created_at,
     };
   }
 
-  createPenawaran(body: CreatePenawaranDto) {
+  async createPenawaran(body: CreatePenawaranDto) {
+    const supplier = await this.prisma.supplier.findUnique({
+      where: {
+        id_supplier: body.supplier_id,
+      },
+    });
+
+    if (!supplier) {
+      throw new NotFoundException('Supplier tidak ditemukan');
+    }
+
     const date = new Date();
 
     const produk = body.produk.map((item) => {
       return {
+        kode_item: item.kode_item,
         kode_pabrik: item.kode_pabrik,
         nama_produk: item.nama_produk,
         qty: item.qty,
@@ -94,6 +91,10 @@ export class PenawaranService {
       data: {
         id_penawaran: generateID('OFFER', date),
         supplier_id: body.supplier_id,
+        nama_supplier: supplier.nama,
+        email_supplier: supplier.email,
+        alamat: supplier.alamat_kantor,
+        no_telp: supplier.no_telp,
         penawarandetail: {
           createMany: {
             data: produk,

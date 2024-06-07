@@ -8,12 +8,13 @@ export const createPenawaranSchema = z.object({
   supplier_id: z.string().trim(),
   produk: z.array(
     z.object({
-      kode_pabrik: z.string().optional(),
+      kode_item: z.string(),
+      kode_pabrik: z.string().optional().nullable(),
       nama_produk: z.string(),
       qty: z.number().min(1),
       satuan: z.string(),
-      harga: z.number().min(0).optional(),
-      jumlah: z.number().min(0).optional(),
+      harga: z.number().min(0).optional().nullable(),
+      jumlah: z.number().min(0).optional().nullable(),
     }),
   ),
 });
