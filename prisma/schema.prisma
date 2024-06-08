@@ -271,10 +271,10 @@ model PenawaranDetail {
   kode_item               String?       @db.VarChar(255) 
   kode_pabrik             String?       @db.VarChar(255) 
   nama_produk             String        @db.VarChar(255) 
-  qty                     Int
+  qty                     Float         @db.Float()
   satuan                  String        @db.VarChar(20) 
   harga                   Int?
-  jumlah                  Float?        @db.Float()
+  jumlah                  Int?          
 
   penawaran               Penawaran     @relation(fields: [penawaran_id], references: [id_penawaran])
 
