@@ -12,6 +12,7 @@ import { SupplierModule } from './supplier/supplier.module';
 import { SuratjalanModule } from './suratjalan/suratjalan.module';
 import { TransaksiModule } from './transaksi/transaksi.module';
 import { PenawaranModule } from './penawaran/penawaran.module';
+import { PreorderModule } from './preorder/preorder.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PenawaranModule } from './penawaran/penawaran.module';
     LevelModule,
     MemberModule,
     PenawaranModule,
+    PreorderModule,
   ],
   controllers: [AppController],
   providers: [],
