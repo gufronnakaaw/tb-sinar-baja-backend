@@ -21,7 +21,7 @@ export const createPreorderSchema = z.object({
       qty: z.number().min(1),
       satuan: z.string(),
       harga: z.number(),
-      subharga: z.number(),
+      subharga: z.number().optional(),
       jumlah: z.number(),
     }),
   ),
