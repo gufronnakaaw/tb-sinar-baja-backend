@@ -280,3 +280,39 @@ model PenawaranDetail {
 
   @@map("penawarandetail")
 }
+
+model Preorder {
+  id_table                Int           @id               @default(autoincrement())
+  id_preorder             String        @db.VarChar(255)  @unique
+  supplier_id             String?
+  nama_supplier           String?       @db.VarChar(255)           
+  email_supplier          String?       @db.VarChar(255)           
+  no_telp                 String?       @db.VarChar(255)           
+  alamat                  String?       @db.Text  
+  keterangan              String?       @db.Text  
+  tipe                    String        @db.VarChar(255) 
+  total                   Int           @db.UnsignedInt
+  
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  preorderdetail          PreorderDetail[] 
+
+  @@map("preorder")
+}
+
+model PreorderDetail  {
+  id_table                Int           @id               @default(autoincrement())
+  preorder_id             String        @db.VarChar(255) 
+  kode_item               String?       @db.VarChar(255) 
+  kode_pabrik             String?       @db.VarChar(255) 
+  nama_produk             String        @db.VarChar(255) 
+  qty                     Float         @db.Float()
+  satuan                  String        @db.VarChar(20) 
+  harga                   Int?
+  jumlah                  Int?  
+
+  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
+  
+  @@map("preorderdetail")
+}
