@@ -76,7 +76,7 @@ export class PreorderService {
         nama_produk: item.nama_produk,
         qty: item.qty,
         satuan: item.satuan,
-        harga: item.harga,
+        harga: !item.subharga ? item.harga : item.subharga,
         jumlah: item.jumlah,
       };
     });
