@@ -297,6 +297,7 @@ model Preorder {
   updated_at              DateTime      @updatedAt
 
   preorderdetail          PreorderDetail[] 
+  invoice                 Invoice[]
 
   @@map("preorder")
 }
@@ -315,4 +316,45 @@ model PreorderDetail  {
   preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
   
   @@map("preorderdetail")
+}
+
+model Invoice {
+  id_table                Int           @id               @default(autoincrement())
+  id_invoice              String        @db.VarChar(255)  @unique
+  preorder_id             String
+  nomor_invoice           String?       @db.VarChar(255) 
+  tagihan                 Int           @db.UnsignedInt
+  sisa                    Int           @db.UnsignedInt
+  jatuh_tempo             String      
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
+  invoicedetail           InvoiceDetail[]
+
+  @@map("invoice")
+}
+
+model InvoiceDetail {
+  id_table                Int           @id               @default(autoincrement())
+  invoice_id              String
+  id_transaksi            String?       @db.VarChar(255) 
+  nama_bank               String?       @db.VarChar(255) 
+  atas_nama               String?       @db.VarChar(255) 
+  no_rekening             String?       @db.VarChar(255) 
+  tipe                    Tipe          @default(transfer) 
+  jumlah                  Int?          @db.UnsignedInt
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+   
+  invoice                 Invoice       @relation(fields: [invoice_id], references: [id_invoice])
+
+  @@map("invoicedetail")
+}
+
+enum Tipe {
+  cash
+  transfer
 }
