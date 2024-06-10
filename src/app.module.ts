@@ -13,6 +13,7 @@ import { SuratjalanModule } from './suratjalan/suratjalan.module';
 import { TransaksiModule } from './transaksi/transaksi.module';
 import { PenawaranModule } from './penawaran/penawaran.module';
 import { PreorderModule } from './preorder/preorder.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PreorderModule } from './preorder/preorder.module';
     MemberModule,
     PenawaranModule,
     PreorderModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [],
