@@ -42,10 +42,12 @@ export class PreorderService {
       let status = '';
 
       if (!invoice.length) {
-        status += 'hutang';
+        status += 'kosong';
         delete item.invoice;
       } else {
-        if (
+        if (invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) == 0) {
+          status += 'hutang';
+        } else if (
           invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) <
           invoice[0].tagihan
         ) {
