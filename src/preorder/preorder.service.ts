@@ -7,8 +7,8 @@ import { CreatePreorderDto } from './preorder.dto';
 export class PreorderService {
   constructor(private prisma: PrismaService) {}
 
-  getPreorder() {
-    return this.prisma.preorder.findMany({
+  async getPreorder() {
+    const preorder = await this.prisma.preorder.findMany({
       select: {
         id_preorder: true,
         supplier_id: true,
@@ -24,6 +24,13 @@ export class PreorderService {
       orderBy: {
         created_at: 'desc',
       },
+    });
+
+    return preorder.map((item) => {
+      return {
+        ...item,
+        sumber: !item.supplier_id ? 'non_supplier' : 'supplier',
+      };
     });
   }
 
@@ -63,6 +70,7 @@ export class PreorderService {
     return {
       ...result,
       produk: preorderdetail,
+      sumber: !result.supplier_id ? 'non_supplier' : 'supplier',
     };
   }
 
