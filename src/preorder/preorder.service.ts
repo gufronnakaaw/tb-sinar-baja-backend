@@ -20,6 +20,16 @@ export class PreorderService {
         tipe: true,
         total: true,
         created_at: true,
+        invoice: {
+          select: {
+            tagihan: true,
+            invoicedetail: {
+              select: {
+                jumlah: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         created_at: 'desc',
@@ -27,9 +37,30 @@ export class PreorderService {
     });
 
     return preorder.map((item) => {
+      const { invoice } = item;
+
+      let status = '';
+
+      if (invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) == 0) {
+        status += 'hutang';
+      } else if (
+        invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) <
+        invoice[0].tagihan
+      ) {
+        status += 'pembayaran';
+      } else if (
+        invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) >=
+        invoice[0].tagihan
+      ) {
+        status += 'lunas';
+      }
+
+      delete item.invoice;
+
       return {
         ...item,
         sumber: !item.supplier_id ? 'non_supplier' : 'supplier',
+        status,
       };
     });
   }
