@@ -82,6 +82,9 @@ export class InvoiceService {
             jumlah: true,
             created_at: true,
           },
+          orderBy: {
+            created_at: 'desc',
+          },
         },
         created_at: true,
       },
