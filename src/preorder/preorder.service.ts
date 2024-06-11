@@ -41,21 +41,24 @@ export class PreorderService {
 
       let status = '';
 
-      if (invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) == 0) {
+      if (!invoice.length) {
         status += 'hutang';
-      } else if (
-        invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) <
-        invoice[0].tagihan
-      ) {
-        status += 'pembayaran';
-      } else if (
-        invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) >=
-        invoice[0].tagihan
-      ) {
-        status += 'lunas';
-      }
+        delete item.invoice;
+      } else {
+        if (
+          invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) <
+          invoice[0].tagihan
+        ) {
+          status += 'pembayaran';
+        } else if (
+          invoice[0].invoicedetail.reduce((a, b) => a + b.jumlah, 0) >=
+          invoice[0].tagihan
+        ) {
+          status += 'lunas';
+        }
 
-      delete item.invoice;
+        delete item.invoice;
+      }
 
       return {
         ...item,
