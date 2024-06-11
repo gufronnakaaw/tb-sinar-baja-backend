@@ -136,41 +136,6 @@ export class InvoiceService {
 
     const date = new Date();
 
-    if (body.sumber == 'non_supplier') {
-      return this.prisma.invoice.create({
-        data: {
-          id_invoice: generateID('INV', date),
-          preorder_id: body.preorder_id,
-          nomor_invoice: body.nomor_invoice,
-          tagihan: body.tagihan,
-          sisa: body.sisa,
-          jatuh_tempo: body.jatuh_tempo,
-          invoicedetail: {
-            create: {
-              id_transaksi: body.id_transaksi,
-              nama_bank: body.nama_bank,
-              atas_nama: body.atas_nama,
-              no_rekening: body.no_rekening,
-              tipe: body.tipe,
-              jumlah: body.jumlah,
-            },
-          },
-          created_at: date,
-          updated_at: date,
-        },
-      });
-    }
-
-    const supplierbank = await this.prisma.supplierBank.findUnique({
-      where: {
-        id_table: body.bank_id,
-      },
-    });
-
-    if (!supplierbank) {
-      throw new NotFoundException('Bank tidak ditemukan');
-    }
-
     return this.prisma.invoice.create({
       data: {
         id_invoice: generateID('INV', date),
@@ -179,16 +144,6 @@ export class InvoiceService {
         tagihan: body.tagihan,
         sisa: body.sisa,
         jatuh_tempo: body.jatuh_tempo,
-        invoicedetail: {
-          create: {
-            id_transaksi: body.id_transaksi,
-            nama_bank: supplierbank.nama,
-            atas_nama: supplierbank.atas_nama,
-            no_rekening: supplierbank.no_rekening,
-            tipe: body.tipe,
-            jumlah: body.jumlah,
-          },
-        },
         created_at: date,
         updated_at: date,
       },
