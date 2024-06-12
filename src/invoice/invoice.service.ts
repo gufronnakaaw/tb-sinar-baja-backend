@@ -70,6 +70,7 @@ export class InvoiceService {
         preorder: {
           select: {
             supplier_id: true,
+            nama_supplier: true,
           },
         },
         invoicedetail: {
@@ -110,6 +111,7 @@ export class InvoiceService {
       ...invoice,
       status,
       sumber: !preorder.supplier_id ? 'non_supplier' : 'supplier',
+      nama_supplier: preorder.nama_supplier,
     };
   }
 
