@@ -120,6 +120,13 @@ model Transaksi {
   tipe                    String?       @db.VarChar(255)
   unique_key              String?       @db.VarChar(255)
   metode                  String?       @db.VarChar(255)
+  id_transaksi_bank       String?       @db.VarChar(255)
+  nama_bank               String?       @db.VarChar(255)
+  atas_nama               String?       @db.VarChar(255)
+  no_rekening             String?       @db.VarChar(255)
+  diskon_langsung_item    String?       @db.VarChar(255)
+  diskon_persen_item      String?       @db.VarChar(255)
+  asal_transaksi          String?       @db.VarChar(255)
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
