@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+export type MemberQuery = {
+  id_member: string;
+};
+
 export const createMemberSchema = z.object({
   level_id: z.string(),
   nama: z.string(),

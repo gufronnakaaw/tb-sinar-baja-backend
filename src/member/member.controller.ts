@@ -8,12 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
   CreateMemberDto,
+  MemberQuery,
   UpdateMemberDto,
   createMemberSchema,
   updateMemberSchema,
@@ -26,8 +28,16 @@ export class MemberController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async index(): Promise<SuccessResponse> {
+  async index(@Query() query: MemberQuery): Promise<SuccessResponse> {
     try {
+      if (query.id_member) {
+        return {
+          success: true,
+          status_code: HttpStatus.OK,
+          data: await this.memberService.getMemberById(query.id_member),
+        };
+      }
+
       return {
         success: true,
         status_code: HttpStatus.OK,

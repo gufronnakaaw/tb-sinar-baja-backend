@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { pricename } from '../utils/price.util';
 import { PrismaService } from '../utils/services/prisma.service';
 import { CreateMemberDto, UpdateMemberDto } from './member.dto';
 
@@ -41,6 +42,38 @@ export class MemberService {
         level: level.nama,
       };
     });
+  }
+
+  async getMemberById(id_member: string) {
+    const member = await this.prisma.member.findUnique({
+      where: {
+        id_member,
+      },
+      select: {
+        id_member: true,
+        nama: true,
+        perusahaan: true,
+        alamat: true,
+        email: true,
+        no_telp: true,
+        created_at: true,
+        updated_at: true,
+        level: {
+          select: {
+            nama: true,
+          },
+        },
+      },
+    });
+
+    const { level } = member;
+    delete member.level;
+
+    return {
+      ...member,
+      level: level.nama,
+      field: pricename[level.nama.split(' ').join('_').toLowerCase()],
+    };
   }
 
   async createMember(body: CreateMemberDto) {
