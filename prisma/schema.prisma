@@ -84,6 +84,7 @@ model Produk {
   subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Restrict)
   gudang                  Gudang        @relation(fields: [gudang_id], references: [kode_gudang], onUpdate: NoAction, onDelete: Restrict)
   pricelist               Pricelist[]
+  hargaquantity           HargaQuantity[]
 
   @@map("produk")        
 }
@@ -124,8 +125,8 @@ model Transaksi {
   nama_bank               String?       @db.VarChar(255)
   atas_nama               String?       @db.VarChar(255)
   no_rekening             String?       @db.VarChar(255)
-  diskon_langsung_item    String?       @db.VarChar(255)
-  diskon_persen_item      String?       @db.VarChar(255)
+  diskon_langsung_item    Int?          @db.UnsignedInt
+  diskon_persen_item      Int?          @db.UnsignedInt
   asal_transaksi          String?       @db.VarChar(255)
 
   created_at              DateTime      @default(now())
@@ -364,4 +365,15 @@ model InvoiceDetail {
 enum Tipe {
   cash
   transfer
+}
+
+model HargaQuantity {
+  id_table                Int           @id               @default(autoincrement())
+  produk_id               String
+  harga                   Int           @db.UnsignedInt
+  keterangan              String?
+
+  produk                  Produk        @relation(fields: [produk_id], references: [kode_item])
+
+  @@map("hargaquantity")
 }
