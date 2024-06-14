@@ -23,8 +23,6 @@ export const createTransaksiSchema = z.object({
   atas_nama: z.string().optional(),
   no_rekening: z.string().optional(),
   id_transaksi_bank: z.string().optional(),
-  diskon_langsung_item: z.number().optional(),
-  diskon_persen_item: z.number().optional(),
   list_produk: z
     .array(
       z.object({
@@ -36,6 +34,8 @@ export const createTransaksiSchema = z.object({
         rak: z.string().trim(),
         harga: z.number().positive(),
         sub_total: z.number().positive(),
+        diskon_langsung_item: z.number().optional(),
+        diskon_persen_item: z.number().optional(),
       }),
     )
     .min(1),
