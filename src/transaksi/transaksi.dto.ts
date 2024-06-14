@@ -18,6 +18,13 @@ export const createTransaksiSchema = z.object({
   tipe: z.string().trim().optional(),
   unique_key: z.string().trim().optional(),
   metode: z.string().trim().optional(),
+  asal_transaksi: z.string().optional(),
+  nama_bank: z.string().optional(),
+  atas_nama: z.string().optional(),
+  no_rekening: z.string().optional(),
+  id_transaksi_bank: z.string().optional(),
+  diskon_langsung_item: z.number().optional(),
+  diskon_persen_item: z.number().optional(),
   list_produk: z
     .array(
       z.object({

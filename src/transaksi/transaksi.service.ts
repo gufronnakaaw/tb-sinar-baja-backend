@@ -192,6 +192,13 @@ export class TransaksiService {
           tipe: body.tipe,
           unique_key: body.unique_key,
           metode: body.metode,
+          asal_transaksi: body.asal_transaksi,
+          nama_bank: body.nama_bank,
+          atas_nama: body.atas_nama,
+          no_rekening: body.no_rekening,
+          id_transaksi_bank: body.id_transaksi_bank,
+          diskon_langsung_item: body.diskon_langsung_item,
+          diskon_persen_item: body.diskon_persen_item,
           transaksidetail: {
             createMany: {
               data: body.list_produk.map((produk) => {
