@@ -125,8 +125,6 @@ model Transaksi {
   nama_bank               String?       @db.VarChar(255)
   atas_nama               String?       @db.VarChar(255)
   no_rekening             String?       @db.VarChar(255)
-  diskon_langsung_item    Int?          @db.UnsignedInt
-  diskon_persen_item      Int?          @db.UnsignedInt
   asal_transaksi          String?       @db.VarChar(255)
 
   created_at              DateTime      @default(now())
@@ -148,6 +146,8 @@ model TransaksiDetail {
   gudang                  String?       @db.VarChar(255)
   rak                     String?       @db.VarChar(255)
   harga                   Int           @db.UnsignedInt
+  diskon_langsung_item    Int?          @db.UnsignedInt
+  diskon_persen_item      Int?          @db.UnsignedInt
   sub_total               Int           @db.UnsignedInt
 
   transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi], onUpdate: NoAction, onDelete: Restrict)
