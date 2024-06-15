@@ -23,6 +23,7 @@ export const createTransaksiSchema = z.object({
   atas_nama: z.string().optional(),
   no_rekening: z.string().optional(),
   id_transaksi_bank: z.string().optional(),
+  status: z.string().optional(),
   list_produk: z
     .array(
       z.object({

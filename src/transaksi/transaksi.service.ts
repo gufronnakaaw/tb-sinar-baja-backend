@@ -205,6 +205,7 @@ export class TransaksiService {
           atas_nama: body.atas_nama,
           no_rekening: body.no_rekening,
           id_transaksi_bank: body.id_transaksi_bank,
+          status: body.status,
           transaksidetail: {
             createMany: {
               data: body.list_produk.map((produk) => {
