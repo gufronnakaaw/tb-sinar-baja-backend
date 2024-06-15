@@ -161,6 +161,15 @@ export class ProdukService {
               nama: true,
             },
           },
+          hargaquantity: {
+            select: {
+              id_table: true,
+              harga: true,
+              quantity: true,
+              keterangan: true,
+              produk_id: true,
+            },
+          },
         },
         where: {
           OR: [
