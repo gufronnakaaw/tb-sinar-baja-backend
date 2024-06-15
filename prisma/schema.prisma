@@ -126,7 +126,8 @@ model Transaksi {
   atas_nama               String?       @db.VarChar(255)
   no_rekening             String?       @db.VarChar(255)
   asal_transaksi          String?       @db.VarChar(255)
-
+  status                  String?       @db.VarChar(255) @default("lunas")
+  
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
