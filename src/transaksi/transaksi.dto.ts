@@ -13,7 +13,7 @@ export const createTransaksiSchema = z.object({
   persen_diskon: z.number().positive().optional().nullable(),
   total_belanja: z.number().positive(),
   total_pembayaran: z.number().positive(),
-  tunai: z.number().positive(),
+  tunai: z.number(),
   kembalian: z.number(),
   tipe: z.string().trim().optional(),
   unique_key: z.string().trim().optional(),
