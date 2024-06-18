@@ -12,8 +12,10 @@ import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
   CreateTransaksiDto,
+  PaymentTransaksiDto,
   TransaksiQuery,
   createTransaksiSchema,
+  paymentTransaksiSchema,
 } from './transaksi.dto';
 import { TransaksiService } from './transaksi.service';
 
@@ -50,6 +52,23 @@ export class TransaksiController {
   async store(@Body() body: CreateTransaksiDto): Promise<SuccessResponse> {
     try {
       const data = await this.transaksiService.createTransaksi(body);
+
+      return {
+        success: true,
+        status_code: HttpStatus.CREATED,
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('payment')
+  @UsePipes(new ZodValidationPipe(paymentTransaksiSchema))
+  @HttpCode(HttpStatus.CREATED)
+  async payment(@Body() body: PaymentTransaksiDto): Promise<SuccessResponse> {
+    try {
+      const data = await this.transaksiService.payment(body);
 
       return {
         success: true,

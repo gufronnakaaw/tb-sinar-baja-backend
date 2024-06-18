@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { generateID } from 'src/utils/generate.util';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreateTransaksiDto, TransaksiQuery } from './transaksi.dto';
+import {
+  CreateTransaksiDto,
+  PaymentTransaksiDto,
+  TransaksiQuery,
+} from './transaksi.dto';
 
 @Injectable()
 export class TransaksiService {
@@ -266,5 +270,40 @@ export class TransaksiService {
       ...results,
       list_produk: transaksidetail,
     };
+  }
+
+  async payment(body: PaymentTransaksiDto) {
+    const transaksi = await this.prisma.transaksi.findUnique({
+      where: {
+        id_transaksi: body.id_transaksi,
+      },
+    });
+
+    if (!transaksi) {
+      throw new NotFoundException('Transaksi tidak ditemukan');
+    }
+
+    const update = await this.prisma.transaksi.update({
+      where: {
+        id_transaksi: body.id_transaksi,
+      },
+      data: {
+        pembayaran: {
+          increment: body.jumlah,
+        },
+      },
+      select: {
+        total_pembayaran: true,
+      },
+    });
+
+    await this.prisma.transaksi.update({
+      where: {
+        id_transaksi: body.id_transaksi,
+      },
+      data: {
+        status: body.jumlah >= update.total_pembayaran ? 'lunas' : 'piutang',
+      },
+    });
   }
 }

@@ -1,4 +1,9 @@
 import { z } from 'zod';
+export type TransaksiQuery = {
+  id: string;
+  search: string;
+  role: string;
+};
 
 export const createTransaksiSchema = z.object({
   keterangan: z.string().trim().optional(),
@@ -47,8 +52,9 @@ export const createTransaksiSchema = z.object({
 
 export type CreateTransaksiDto = z.infer<typeof createTransaksiSchema>;
 
-export type TransaksiQuery = {
-  id: string;
-  search: string;
-  role: string;
-};
+export const paymentTransaksiSchema = z.object({
+  id_transaksi: z.string(),
+  jumlah: z.number(),
+});
+
+export type PaymentTransaksiDto = z.infer<typeof paymentTransaksiSchema>;
