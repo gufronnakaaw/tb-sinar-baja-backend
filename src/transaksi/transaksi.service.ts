@@ -283,7 +283,7 @@ export class TransaksiService {
       throw new NotFoundException('Transaksi tidak ditemukan');
     }
 
-    const update = await this.prisma.transaksi.update({
+    await this.prisma.transaksi.update({
       where: {
         id_transaksi: body.id_transaksi,
       },
@@ -291,6 +291,12 @@ export class TransaksiService {
         pembayaran: {
           increment: body.jumlah,
         },
+      },
+    });
+
+    const update = await this.prisma.transaksi.findUnique({
+      where: {
+        id_transaksi: body.id_transaksi,
       },
       select: {
         total_pembayaran: true,
