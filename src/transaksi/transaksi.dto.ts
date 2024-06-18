@@ -24,6 +24,9 @@ export const createTransaksiSchema = z.object({
   no_rekening: z.string().optional(),
   id_transaksi_bank: z.string().optional(),
   status: z.string().optional(),
+  dp: z.number().optional(),
+  pembayaran: z.number().optional(),
+  estimasi: z.string().optional(),
   list_produk: z
     .array(
       z.object({
@@ -47,4 +50,5 @@ export type CreateTransaksiDto = z.infer<typeof createTransaksiSchema>;
 export type TransaksiQuery = {
   id: string;
   search: string;
+  role: string;
 };

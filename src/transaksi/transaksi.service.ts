@@ -56,6 +56,9 @@ export class TransaksiService {
     }
 
     const results = await this.prisma.transaksi.findMany({
+      where: {
+        asal_transaksi: query.role == 'admin' ? 'admin' : 'kasir',
+      },
       include: {
         transaksidetail: {
           select: {
@@ -206,6 +209,9 @@ export class TransaksiService {
           no_rekening: body.no_rekening,
           id_transaksi_bank: body.id_transaksi_bank,
           status: body.status,
+          dp: body.dp,
+          pembayaran: body.pembayaran,
+          estimasi: body.estimasi,
           transaksidetail: {
             createMany: {
               data: body.list_produk.map((produk) => {
