@@ -300,6 +300,7 @@ export class TransaksiService {
       },
       select: {
         total_pembayaran: true,
+        pembayaran: true,
       },
     });
 
@@ -308,7 +309,8 @@ export class TransaksiService {
         id_transaksi: body.id_transaksi,
       },
       data: {
-        status: body.jumlah >= update.total_pembayaran ? 'lunas' : 'piutang',
+        status:
+          update.pembayaran >= update.total_pembayaran ? 'lunas' : 'piutang',
       },
     });
   }
