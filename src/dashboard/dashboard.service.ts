@@ -31,9 +31,9 @@ export class DashboardService {
       omzet: !omzet ? 0 : omzet,
       laba_kotor: 0,
       barang_rusak: 0,
-      pembayaran_lunas: 0,
+      hutang: 0,
       estimasi_rugi: 0,
-      konsinyasi: 0,
+      piutang: 0,
     };
   }
 
@@ -44,8 +44,8 @@ export class DashboardService {
       status_stok: 'aman',
       omzet: !omzet ? 0 : omzet,
       barang_rusak: 0,
-      pembayaran_lunas: 0,
-      konsinyasi: 10,
+      hutang: 0,
+      piutang: 10,
     };
   }
 
