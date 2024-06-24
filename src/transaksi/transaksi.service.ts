@@ -59,6 +59,42 @@ export class TransaksiService {
       });
     }
 
+    if (query.role == 'all') {
+      const results = await this.prisma.transaksi.findMany({
+        include: {
+          transaksidetail: {
+            select: {
+              kode_item: true,
+              jumlah: true,
+              satuan: true,
+              nama_produk: true,
+              harga: true,
+              gudang: true,
+              rak: true,
+              sub_total: true,
+              diskon_langsung_item: true,
+              diskon_persen_item: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      return results.map((transaksi) => {
+        delete transaksi.id_table;
+
+        const { transaksidetail, ...result } = transaksi;
+        delete transaksi.transaksidetail;
+
+        return {
+          ...result,
+          list_produk: transaksidetail,
+        };
+      });
+    }
+
     const results = await this.prisma.transaksi.findMany({
       where: {
         asal_transaksi: query.role == 'admin' ? 'admin' : 'kasir',
