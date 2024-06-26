@@ -220,107 +220,202 @@ export class TransaksiService {
     }
 
     if (body.asal_transaksi == 'admin') {
-      if (body.dp) {
-        const [result] = await this.prisma.$transaction([
-          this.prisma.transaksi.create({
-            data: {
-              id_transaksi: generateID('TX', date),
-              keterangan: body.keterangan,
-              penerima: body.penerima,
-              no_telp: body.no_telp,
-              pengiriman: body.pengiriman,
-              alamat: body.alamat,
-              ongkir: body.ongkir,
-              pajak: body.pajak,
-              persen_pajak: body.persen_pajak,
-              diskon: body.diskon,
-              persen_diskon: body.persen_diskon,
-              total_belanja: body.total_belanja,
-              total_pembayaran: body.total_pembayaran,
-              tunai: body.tunai,
-              kembalian: body.kembalian,
-              tipe: body.tipe,
-              unique_key: body.unique_key,
-              metode: body.metode,
-              asal_transaksi: body.asal_transaksi,
-              nama_bank: body.nama_bank,
-              atas_nama: body.atas_nama,
-              no_rekening: body.no_rekening,
-              id_transaksi_bank: body.id_transaksi_bank,
-              status: body.status,
-              dp: null,
-              pembayaran: null,
-              estimasi: body.estimasi,
-              transaksidetail: {
-                createMany: {
-                  data: body.list_produk.map((produk) => {
-                    return {
-                      diskon_langsung_item: produk.diskon_langsung_item,
-                      diskon_persen_item: produk.diskon_persen_item,
-                      jumlah: produk.jumlah,
-                      satuan: produk.satuan,
-                      kode_item: produk.kode_item,
-                      nama_produk: produk.nama_produk,
-                      gudang: produk.gudang,
-                      rak: produk.rak,
-                      harga: produk.harga,
-                      sub_total: produk.sub_total,
-                    };
-                  }),
+      if (body.metode == 'tempo') {
+        if (body.dp) {
+          const [result] = await this.prisma.$transaction([
+            this.prisma.transaksi.create({
+              data: {
+                id_transaksi: generateID('TX', date),
+                keterangan: body.keterangan,
+                penerima: body.penerima,
+                no_telp: body.no_telp,
+                pengiriman: body.pengiriman,
+                alamat: body.alamat,
+                ongkir: body.ongkir,
+                pajak: body.pajak,
+                persen_pajak: body.persen_pajak,
+                diskon: body.diskon,
+                persen_diskon: body.persen_diskon,
+                total_belanja: body.total_belanja,
+                total_pembayaran: body.total_pembayaran,
+                tunai: body.tunai,
+                kembalian: body.kembalian,
+                tipe: body.tipe,
+                unique_key: body.unique_key,
+                metode: body.metode,
+                asal_transaksi: body.asal_transaksi,
+                nama_bank: body.nama_bank,
+                atas_nama: body.atas_nama,
+                no_rekening: body.no_rekening,
+                id_transaksi_bank: body.id_transaksi_bank,
+                status: body.status,
+                dp: null,
+                pembayaran: null,
+                estimasi: body.estimasi,
+                transaksidetail: {
+                  createMany: {
+                    data: body.list_produk.map((produk) => {
+                      return {
+                        diskon_langsung_item: produk.diskon_langsung_item,
+                        diskon_persen_item: produk.diskon_persen_item,
+                        jumlah: produk.jumlah,
+                        satuan: produk.satuan,
+                        kode_item: produk.kode_item,
+                        nama_produk: produk.nama_produk,
+                        gudang: produk.gudang,
+                        rak: produk.rak,
+                        harga: produk.harga,
+                        sub_total: produk.sub_total,
+                      };
+                    }),
+                  },
                 },
-              },
-              suratjalan: {
-                create: {
-                  id_suratjalan: generateID('SJ', date),
+                suratjalan: {
+                  create: {
+                    id_suratjalan: generateID('SJ', date),
+                  },
                 },
-              },
-              invoicekeluar: {
-                create: {
-                  id_invoice: generateID('INVOUT', date),
-                  dp: body.dp,
-                  tagihan: body.total_pembayaran,
-                  sisa: body.total_pembayaran - body.dp,
-                  invoicekeluardetail: {
-                    create: {
-                      jumlah: body.dp,
-                      tipe: 'cash',
-                      created_at: date,
-                      updated_at: date,
+                invoicekeluar: {
+                  create: {
+                    id_invoice: generateID('INVOUT', date),
+                    dp: body.dp,
+                    tagihan: body.total_pembayaran,
+                    sisa: body.total_pembayaran - body.dp,
+                    invoicekeluardetail: {
+                      create: {
+                        jumlah: body.dp,
+                        tipe: 'cash',
+                        created_at: date,
+                        updated_at: date,
+                      },
                     },
                   },
                 },
+                created_at: date,
+                updated_at: date,
               },
-              created_at: date,
-              updated_at: date,
-            },
-            include: {
-              transaksidetail: {
-                select: {
-                  kode_item: true,
-                  jumlah: true,
-                  satuan: true,
-                  nama_produk: true,
-                  harga: true,
-                  gudang: true,
-                  rak: true,
-                  sub_total: true,
-                  diskon_langsung_item: true,
-                  diskon_persen_item: true,
+              include: {
+                transaksidetail: {
+                  select: {
+                    kode_item: true,
+                    jumlah: true,
+                    satuan: true,
+                    nama_produk: true,
+                    harga: true,
+                    gudang: true,
+                    rak: true,
+                    sub_total: true,
+                    diskon_langsung_item: true,
+                    diskon_persen_item: true,
+                  },
                 },
               },
-            },
-          }),
-        ]);
+            }),
+          ]);
 
-        delete result.id_table;
+          delete result.id_table;
 
-        const { transaksidetail, ...results } = result;
-        delete result.transaksidetail;
+          const { transaksidetail, ...results } = result;
+          delete result.transaksidetail;
 
-        return {
-          ...results,
-          list_produk: transaksidetail,
-        };
+          return {
+            ...results,
+            list_produk: transaksidetail,
+          };
+        } else {
+          const [result] = await this.prisma.$transaction([
+            this.prisma.transaksi.create({
+              data: {
+                id_transaksi: generateID('TX', date),
+                keterangan: body.keterangan,
+                penerima: body.penerima,
+                no_telp: body.no_telp,
+                pengiriman: body.pengiriman,
+                alamat: body.alamat,
+                ongkir: body.ongkir,
+                pajak: body.pajak,
+                persen_pajak: body.persen_pajak,
+                diskon: body.diskon,
+                persen_diskon: body.persen_diskon,
+                total_belanja: body.total_belanja,
+                total_pembayaran: body.total_pembayaran,
+                tunai: body.tunai,
+                kembalian: body.kembalian,
+                tipe: body.tipe,
+                unique_key: body.unique_key,
+                metode: body.metode,
+                asal_transaksi: body.asal_transaksi,
+                nama_bank: body.nama_bank,
+                atas_nama: body.atas_nama,
+                no_rekening: body.no_rekening,
+                id_transaksi_bank: body.id_transaksi_bank,
+                status: body.status,
+                dp: null,
+                pembayaran: null,
+                estimasi: body.estimasi,
+                transaksidetail: {
+                  createMany: {
+                    data: body.list_produk.map((produk) => {
+                      return {
+                        diskon_langsung_item: produk.diskon_langsung_item,
+                        diskon_persen_item: produk.diskon_persen_item,
+                        jumlah: produk.jumlah,
+                        satuan: produk.satuan,
+                        kode_item: produk.kode_item,
+                        nama_produk: produk.nama_produk,
+                        gudang: produk.gudang,
+                        rak: produk.rak,
+                        harga: produk.harga,
+                        sub_total: produk.sub_total,
+                      };
+                    }),
+                  },
+                },
+                suratjalan: {
+                  create: {
+                    id_suratjalan: generateID('SJ', date),
+                  },
+                },
+                invoicekeluar: {
+                  create: {
+                    id_invoice: generateID('INVOUT', date),
+                    dp: body.dp,
+                    tagihan: body.total_pembayaran,
+                    sisa: body.total_pembayaran - body.dp,
+                  },
+                },
+                created_at: date,
+                updated_at: date,
+              },
+              include: {
+                transaksidetail: {
+                  select: {
+                    kode_item: true,
+                    jumlah: true,
+                    satuan: true,
+                    nama_produk: true,
+                    harga: true,
+                    gudang: true,
+                    rak: true,
+                    sub_total: true,
+                    diskon_langsung_item: true,
+                    diskon_persen_item: true,
+                  },
+                },
+              },
+            }),
+          ]);
+
+          delete result.id_table;
+
+          const { transaksidetail, ...results } = result;
+          delete result.transaksidetail;
+
+          return {
+            ...results,
+            list_produk: transaksidetail,
+          };
+        }
       } else {
         const [result] = await this.prisma.$transaction([
           this.prisma.transaksi.create({
@@ -378,9 +473,9 @@ export class TransaksiService {
               invoicekeluar: {
                 create: {
                   id_invoice: generateID('INVOUT', date),
-                  dp: body.dp,
+                  dp: 0,
                   tagihan: body.total_pembayaran,
-                  sisa: body.total_pembayaran - body.dp,
+                  sisa: 0,
                 },
               },
               created_at: date,
