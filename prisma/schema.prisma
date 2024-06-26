@@ -135,7 +135,8 @@ model Transaksi {
   updated_at              DateTime      @updatedAt
 
   transaksidetail         TransaksiDetail[]
-  suratjalan              SuratJalan[]         
+  suratjalan              SuratJalan[]   
+  invoicekeluar           InvoiceKeluar[]
 
   @@map("transaksi")
 }
@@ -384,4 +385,40 @@ model HargaQuantity {
   produk                  Produk        @relation(fields: [produk_id], references: [kode_item])
 
   @@map("hargaquantity")
+}
+
+model InvoiceKeluar {
+  id_table                Int           @id               @default(autoincrement())
+  id_invoice              String        @db.VarChar(255)  @unique
+  transaksi_id            String        @db.VarChar(255)
+  tagihan                 Int           @db.UnsignedInt
+  dp                      Int           @db.UnsignedInt
+  sisa                    Int           @db.UnsignedInt
+  jatuh_tempo             String?
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  invoicekeluardetail     InvoiceKeluarDetail[]
+  transaksi               Transaksi      @relation(fields: [transaksi_id], references: [id_transaksi])
+
+  @@map("invoicekeluar")
+}
+
+model InvoiceKeluarDetail {
+  id_table                Int           @id               @default(autoincrement())
+  invoice_id              String
+  id_transaksi            String?       @db.VarChar(255)
+  nama_bank               String?       @db.VarChar(255) 
+  atas_nama               String?       @db.VarChar(255) 
+  no_rekening             String?       @db.VarChar(255) 
+  tipe                    Tipe          @default(transfer) 
+  jumlah                  Int           @db.UnsignedInt
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+   
+  invoicekeluar           InvoiceKeluar @relation(fields: [invoice_id], references: [id_invoice])
+
+  @@map("invoicekeluardetail")
 }
