@@ -30,7 +30,6 @@ export const createTransaksiSchema = z.object({
   id_transaksi_bank: z.string().optional(),
   status: z.string().optional(),
   dp: z.number().optional(),
-  pembayaran: z.number().optional(),
   estimasi: z.string().optional(),
   list_produk: z
     .array(
@@ -51,10 +50,3 @@ export const createTransaksiSchema = z.object({
 });
 
 export type CreateTransaksiDto = z.infer<typeof createTransaksiSchema>;
-
-export const paymentTransaksiSchema = z.object({
-  id_transaksi: z.string(),
-  jumlah: z.number(),
-});
-
-export type PaymentTransaksiDto = z.infer<typeof paymentTransaksiSchema>;
