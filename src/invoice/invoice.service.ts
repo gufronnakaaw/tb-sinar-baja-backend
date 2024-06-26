@@ -5,7 +5,12 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/utils/services/prisma.service';
 import { generateID } from '../utils/generate.util';
-import { CreateInvoiceDto, CreateInvoicePaymentDto } from './invoice.dto';
+import {
+  CreateInvoiceDto,
+  CreateInvoicePaymentDto,
+  PaymentInvoutDto,
+  UpdateInvoutDto,
+} from './invoice.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -237,5 +242,185 @@ export class InvoiceService {
     ]);
 
     return body;
+  }
+
+  async getInvout() {
+    const result = await this.prisma.invoiceKeluar.findMany({
+      select: {
+        id_invoice: true,
+        transaksi_id: true,
+        dp: true,
+        tagihan: true,
+        sisa: true,
+        jatuh_tempo: true,
+        created_at: true,
+        transaksi: {
+          select: {
+            status: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return result.map((item) => {
+      const { transaksi, ...invout } = item;
+      const { status } = transaksi;
+
+      delete item.transaksi;
+
+      return {
+        ...invout,
+        status,
+      };
+    });
+  }
+
+  async getInvoutById(id_invoice: string) {
+    const result = await this.prisma.invoiceKeluar.findUnique({
+      where: {
+        id_invoice,
+      },
+      select: {
+        id_invoice: true,
+        dp: true,
+        tagihan: true,
+        sisa: true,
+        jatuh_tempo: true,
+        created_at: true,
+        transaksi: {
+          include: {
+            transaksidetail: {
+              select: {
+                kode_item: true,
+                jumlah: true,
+                satuan: true,
+                nama_produk: true,
+                harga: true,
+                gudang: true,
+                rak: true,
+                sub_total: true,
+                diskon_langsung_item: true,
+                diskon_persen_item: true,
+              },
+            },
+          },
+        },
+        invoicekeluardetail: {
+          select: {
+            id_transaksi: true,
+            nama_bank: true,
+            atas_nama: true,
+            no_rekening: true,
+            tipe: true,
+            jumlah: true,
+            created_at: true,
+          },
+          orderBy: {
+            created_at: 'desc',
+          },
+        },
+      },
+    });
+
+    const { transaksi, ...invout } = result;
+
+    delete transaksi.id_table;
+
+    const { transaksidetail } = transaksi;
+    delete transaksi.transaksidetail;
+
+    return {
+      ...invout,
+      transaksi: {
+        ...transaksi,
+        list_produk: transaksidetail,
+      },
+    };
+  }
+
+  async paymentInvout(body: PaymentInvoutDto) {
+    const invout = await this.prisma.invoiceKeluar.count({
+      where: {
+        id_invoice: body.invoice_id,
+      },
+    });
+
+    if (!invout) {
+      throw new NotFoundException('Invoice tidak ditemukan');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.invoiceKeluar.update({
+        where: {
+          id_invoice: body.invoice_id,
+        },
+        data: {
+          sisa: {
+            decrement: body.jumlah,
+          },
+        },
+      }),
+      this.prisma.invoiceKeluarDetail.create({
+        data: {
+          invoice_id: body.invoice_id,
+          atas_nama: body.atas_nama,
+          nama_bank: body.nama_bank,
+          no_rekening: body.no_rekening,
+          id_transaksi: body.id_transaksi,
+          jumlah: body.jumlah,
+          tipe: body.tipe,
+        },
+      }),
+    ]);
+
+    const update = await this.prisma.invoiceKeluar.findUnique({
+      where: {
+        id_invoice: body.invoice_id,
+      },
+      select: {
+        transaksi_id: true,
+        tagihan: true,
+        invoicekeluardetail: {
+          select: {
+            jumlah: true,
+          },
+        },
+      },
+    });
+
+    await this.prisma.transaksi.update({
+      where: {
+        id_transaksi: update.transaksi_id,
+      },
+      data: {
+        status:
+          update.invoicekeluardetail.reduce((a, b) => a + b.jumlah, 0) >=
+          update.tagihan
+            ? 'lunas'
+            : 'piutang',
+      },
+    });
+  }
+
+  async updateInvout(body: UpdateInvoutDto) {
+    if (
+      !(await this.prisma.invoiceKeluar.count({
+        where: { id_invoice: body.invoice_id },
+      }))
+    ) {
+      throw new NotFoundException('Invoice tidak ditemukan');
+    }
+
+    return this.prisma.invoiceKeluar.update({
+      where: {
+        id_invoice: body.invoice_id,
+      },
+      data: {
+        jatuh_tempo: body.jatuh_tempo,
+      },
+    });
   }
 }

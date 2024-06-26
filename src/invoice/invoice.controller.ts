@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Query,
   UsePipes,
@@ -14,8 +15,12 @@ import {
   CreateInvoiceDto,
   CreateInvoicePaymentDto,
   InvoiceQuery,
+  PaymentInvoutDto,
+  UpdateInvoutDto,
   createInvoicePaymentSchema,
   createInvoiceSchema,
+  paymentInvoutSchema,
+  updateInvoutSchema,
 } from './invoice.dto';
 import { InvoiceService } from './invoice.service';
 
@@ -71,6 +76,64 @@ export class InvoiceController {
         success: true,
         status_code: HttpStatus.OK,
         data: await this.invoiceService.createPayment(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('out')
+  @HttpCode(HttpStatus.OK)
+  async indexInvout(@Query() query: InvoiceQuery): Promise<SuccessResponse> {
+    try {
+      if (query.id_invoice) {
+        return {
+          success: true,
+          status_code: HttpStatus.OK,
+          data: await this.invoiceService.getInvoutById(query.id_invoice),
+        };
+      }
+
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.invoiceService.getInvout(),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('out')
+  @UsePipes(new ZodValidationPipe(updateInvoutSchema))
+  @HttpCode(HttpStatus.CREATED)
+  async updateInvout(@Body() body: UpdateInvoutDto): Promise<SuccessResponse> {
+    try {
+      const data = await this.invoiceService.updateInvout(body);
+
+      return {
+        success: true,
+        status_code: HttpStatus.CREATED,
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('out/payment')
+  @UsePipes(new ZodValidationPipe(paymentInvoutSchema))
+  @HttpCode(HttpStatus.OK)
+  async paymentInvout(
+    @Body() body: PaymentInvoutDto,
+  ): Promise<SuccessResponse> {
+    try {
+      const data = await this.invoiceService.paymentInvout(body);
+
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data,
       };
     } catch (error) {
       throw error;
