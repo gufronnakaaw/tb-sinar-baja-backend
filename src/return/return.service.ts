@@ -62,13 +62,30 @@ export class ReturnService {
       orderBy: {
         created_at: 'desc',
       },
+      include: {
+        transaksi: {
+          select: {
+            penerima: true,
+          },
+        },
+        returndetail: {
+          select: {
+            nama_produk: true,
+          },
+        },
+      },
     });
 
     return result.map((item) => {
+      const { transaksi, returndetail } = item;
       delete item.id_table;
+      delete item.transaksi;
+      delete item.returndetail;
 
       return {
         ...item,
+        penerima: transaksi.penerima,
+        total_item: returndetail.length,
       };
     });
   }
