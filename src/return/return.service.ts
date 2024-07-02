@@ -18,6 +18,19 @@ export class ReturnService {
 
     const date = new Date();
 
+    for (const produk of body.list_produk) {
+      await this.prisma.produk.update({
+        where: {
+          kode_item: produk.kode_item,
+        },
+        data: {
+          stok: {
+            increment: produk.dikembalikan,
+          },
+        },
+      });
+    }
+
     return this.prisma.return.create({
       data: {
         id_return: generateID('RET', date),
