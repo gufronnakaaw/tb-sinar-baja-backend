@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { removeKeys } from '../utils/removekey.util';
 import { PrismaService } from '../utils/services/prisma.service';
 import {
   CreateBulkProduk,
@@ -12,13 +13,12 @@ export class ProdukService {
   constructor(private prisma: PrismaService) {}
 
   async createBulkProduk(body: CreateBulkProduk) {
-    for (const item of body.produk) {
+    const promises = body.produk.map(async (item) => {
       const data = {
         barcode: item.barcode,
         kode_pabrik: item.kode_pabrik,
         kode_toko: item.kode_toko,
         kode_supplier: item.kode_supplier,
-        gudang_id: item.gudang_id,
         nama_produk: item.nama_produk,
         nama_produk_asli: item.nama_produk_asli,
         nama_produk_sebutan: item.nama_produk_sebutan,
@@ -34,8 +34,6 @@ export class ProdukService {
         berat: item.berat,
         volume: item.volume,
         konversi: item.konversi,
-        stok: item.stok,
-        stok_aman: item.stok_aman,
         isi_satuan_besar: item.isi_satuan_besar,
         merk: item.merk,
         satuan_besar: item.satuan_besar,
@@ -44,18 +42,92 @@ export class ProdukService {
         subkategori_id: item.subkategori_id,
       };
 
-      await this.prisma.produk.upsert({
+      const produk = await this.prisma.produk.count({
         where: {
           kode_item: item.kode_item,
         },
-        create: { kode_item: item.kode_item, ...data },
-        update: data,
       });
-    }
+
+      if (!produk) {
+        return this.createSingleProduk({
+          data: {
+            kode_item: item.kode_item,
+            ...data,
+            stock: {
+              create: {
+                stok: item.stok,
+                stok_aman: item.stok_aman,
+                gudang_id: body.gudang_id,
+              },
+            },
+          },
+        });
+      } else {
+        const stock = await this.prisma.stock.count({
+          where: {
+            produk_id: item.kode_item,
+            gudang_id: body.gudang_id,
+          },
+        });
+
+        if (!stock) {
+          return this.updateSingleProduk({
+            where: {
+              kode_item: item.kode_item,
+            },
+            data: {
+              ...data,
+              stock: {
+                create: {
+                  stok: item.stok,
+                  stok_aman: item.stok_aman,
+                  gudang_id: body.gudang_id,
+                },
+              },
+            },
+          });
+        } else {
+          return this.updateSingleProduk({
+            where: {
+              kode_item: item.kode_item,
+            },
+            data: {
+              ...data,
+              stock: {
+                updateMany: {
+                  where: {
+                    produk_id: item.kode_item,
+                    gudang_id: body.gudang_id,
+                  },
+                  data: {
+                    stok: item.stok,
+                    stok_aman: item.stok_aman,
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+    });
+
+    await Promise.all(promises);
+
+    return {
+      total: body.produk.length,
+    };
+  }
+
+  async createSingleProduk(item: any) {
+    await this.prisma.produk.create(item);
+  }
+
+  async updateSingleProduk(item: any) {
+    await this.prisma.produk.update(item);
   }
 
   async getProdukByKodeItem(kode_item: string) {
-    const produk = await this.prisma.produk.findUnique({
+    const result = await this.prisma.produk.findUnique({
       include: {
         subkategori: {
           select: {
@@ -67,9 +139,16 @@ export class ProdukService {
             },
           },
         },
-        gudang: {
+        stock: {
           select: {
-            nama: true,
+            stok: true,
+            stok_aman: true,
+            gudang: {
+              select: {
+                nama: true,
+                kode_gudang: true,
+              },
+            },
           },
         },
       },
@@ -78,21 +157,35 @@ export class ProdukService {
       },
     });
 
-    const { subkategori } = produk;
-    delete produk.id_table;
-    delete produk.gudang_id;
-    delete produk.subkategori_id;
+    const { subkategori, stock } = result;
+
+    const gudang = [];
+    let total_stok = 0;
+    let total_stok_aman = 0;
+
+    for (const item of stock) {
+      const { stok, stok_aman } = item;
+
+      gudang.push({ stok, stok_aman, ...item.gudang });
+
+      total_stok += item.stok;
+      total_stok_aman += item.stok_aman;
+    }
+
+    const produk = removeKeys(result, ['id_table', 'subkategori_id', 'stock']);
 
     return {
       ...produk,
       subkategori: subkategori.nama,
       kategori: subkategori.kategori.nama,
-      gudang: produk.gudang.nama,
+      gudang,
+      total_stok,
+      total_stok_aman,
     };
   }
 
   async getProdukBySubkategori(id_subkategori: string) {
-    const produk = await this.prisma.produk.findMany({
+    const result = await this.prisma.produk.findMany({
       include: {
         subkategori: {
           select: {
@@ -104,9 +197,16 @@ export class ProdukService {
             },
           },
         },
-        gudang: {
+        stock: {
           select: {
-            nama: true,
+            stok: true,
+            stok_aman: true,
+            gudang: {
+              select: {
+                nama: true,
+                kode_gudang: true,
+              },
+            },
           },
         },
       },
@@ -115,17 +215,35 @@ export class ProdukService {
       },
     });
 
-    return produk.map((item) => {
-      const { subkategori } = item;
-      delete item.id_table;
-      delete item.gudang_id;
-      delete item.subkategori_id;
+    return result.map((element) => {
+      const { subkategori, stock } = element;
+
+      const gudang = [];
+      let total_stok = 0;
+      let total_stok_aman = 0;
+
+      for (const item of stock) {
+        const { stok, stok_aman } = item;
+
+        gudang.push({ stok, stok_aman, ...item.gudang });
+
+        total_stok += item.stok;
+        total_stok_aman += item.stok_aman;
+      }
+
+      const produk = removeKeys(element, [
+        'id_table',
+        'subkategori_id',
+        'stock',
+      ]);
 
       return {
-        ...item,
+        ...produk,
         subkategori: subkategori.nama,
         kategori: subkategori.kategori.nama,
-        gudang: item.gudang.nama,
+        gudang,
+        total_stok,
+        total_stok_aman,
       };
     });
   }
@@ -156,9 +274,16 @@ export class ProdukService {
               },
             },
           },
-          gudang: {
+          stock: {
             select: {
-              nama: true,
+              stok: true,
+              stok_aman: true,
+              gudang: {
+                select: {
+                  nama: true,
+                  kode_gudang: true,
+                },
+              },
             },
           },
           hargaquantity: {
@@ -199,43 +324,52 @@ export class ProdukService {
               },
             },
           ],
-          AND: [
-            {
-              stok: {
-                gt: 0,
-              },
-            },
-          ],
         },
         take: 25,
       });
 
       return produk.map((item) => {
-        delete item.subkategori_id;
-        delete item.id_table;
-        delete item.gudang_id;
+        const { subkategori, stock } = item;
 
-        const { subkategori, gudang, stok, stok_aman } = item;
+        const newItem = removeKeys(item, [
+          'id_table',
+          'subkategori_id',
+          'stock',
+        ]);
 
-        const warning = Math.round((stok_aman / 100) * 50);
-        const danger = Math.round((stok_aman / 100) * 15);
+        const gudang = [];
+        let total_stok = 0;
+        let total_stok_aman = 0;
 
-        let status_stok: string = '';
+        for (const item of stock) {
+          let status_stok: string = '';
 
-        if (stok > stok_aman || stok > warning) {
-          status_stok += 'aman';
-        } else if (stok <= warning && stok > danger) {
-          status_stok += 'menipis';
-        } else {
-          status_stok += 'bahaya';
+          const { stok, stok_aman } = item;
+
+          const warning = Math.round((stok_aman / 100) * 50);
+          const danger = Math.round((stok_aman / 100) * 15);
+
+          if (stok > stok_aman || stok > warning) {
+            status_stok += 'aman';
+          } else if (stok <= warning && stok > danger) {
+            status_stok += 'menipis';
+          } else {
+            status_stok += 'bahaya';
+          }
+
+          gudang.push({ stok, stok_aman, ...item.gudang, status_stok });
+
+          total_stok += item.stok;
+          total_stok_aman += item.stok_aman;
         }
 
         return {
-          ...item,
+          ...newItem,
           kategori: subkategori.kategori.nama,
           subkategori: subkategori.nama,
-          gudang: gudang.nama,
-          status_stok,
+          gudang: gudang,
+          total_stok,
+          total_stok_aman,
         };
       });
     }
@@ -254,9 +388,16 @@ export class ProdukService {
               },
             },
           },
-          gudang: {
+          stock: {
             select: {
-              nama: true,
+              stok: true,
+              stok_aman: true,
+              gudang: {
+                select: {
+                  nama: true,
+                  kode_gudang: true,
+                },
+              },
             },
           },
         },
@@ -269,31 +410,43 @@ export class ProdukService {
     ]);
 
     const produk = resultProduk.map((item) => {
-      delete item.subkategori_id;
-      delete item.id_table;
-      delete item.gudang_id;
+      const { subkategori, stock } = item;
 
-      const { subkategori, stok, stok_aman, gudang } = item;
+      const newItem = removeKeys(item, ['id_table', 'subkategori_id', 'stock']);
 
-      const warning = Math.round((stok_aman / 100) * 50);
-      const danger = Math.round((stok_aman / 100) * 15);
+      const gudang = [];
+      let total_stok = 0;
+      let total_stok_aman = 0;
 
-      let status_stok: string = '';
+      for (const item of stock) {
+        let status_stok: string = '';
 
-      if (stok > stok_aman || stok > warning) {
-        status_stok += 'aman';
-      } else if (stok <= warning && stok > danger) {
-        status_stok += 'menipis';
-      } else {
-        status_stok += 'bahaya';
+        const { stok, stok_aman } = item;
+
+        const warning = Math.round((stok_aman / 100) * 50);
+        const danger = Math.round((stok_aman / 100) * 15);
+
+        if (stok > stok_aman || stok > warning) {
+          status_stok += 'aman';
+        } else if (stok <= warning && stok > danger) {
+          status_stok += 'menipis';
+        } else {
+          status_stok += 'bahaya';
+        }
+
+        gudang.push({ stok, stok_aman, ...item.gudang, status_stok });
+
+        total_stok += item.stok;
+        total_stok_aman += item.stok_aman;
       }
 
       return {
-        ...item,
+        ...newItem,
         kategori: subkategori.kategori.nama,
         subkategori: subkategori.nama,
-        gudang: gudang.nama,
-        status_stok,
+        gudang: gudang,
+        total_stok,
+        total_stok_aman,
       };
     });
 
@@ -318,9 +471,12 @@ export class ProdukService {
 
   updateStokProduk(body: UpdateStokProdukType) {
     if (!body.tipe) {
-      return this.prisma.produk.update({
+      return this.prisma.stock.updateMany({
         where: {
-          kode_item: body.kode_item,
+          produk_id: body.kode_item,
+          gudang: {
+            nama: body.gudang,
+          },
         },
         data: {
           stok_aman: body.stok_aman,
@@ -329,9 +485,12 @@ export class ProdukService {
     }
 
     if (body.tipe == 'increment') {
-      return this.prisma.produk.update({
+      return this.prisma.stock.updateMany({
         where: {
-          kode_item: body.kode_item,
+          produk_id: body.kode_item,
+          gudang: {
+            nama: body.gudang,
+          },
         },
         data: {
           stok: {
@@ -342,9 +501,12 @@ export class ProdukService {
     }
 
     if (body.tipe == 'decrement') {
-      return this.prisma.produk.update({
+      return this.prisma.stock.updateMany({
         where: {
-          kode_item: body.kode_item,
+          produk_id: body.kode_item,
+          gudang: {
+            nama: body.gudang,
+          },
         },
         data: {
           stok: {
@@ -355,34 +517,134 @@ export class ProdukService {
     }
   }
 
-  async filter(id_kategori: number) {
+  async filter(query: ProdukQuery) {
+    if (query.kode_gudang) {
+      const result = await this.prisma.kategori.findUnique({
+        where: {
+          id_kategori: parseInt(query.id_kategori),
+        },
+        include: {
+          subkategori: {
+            select: {
+              nama: true,
+              produk: {
+                where: {
+                  stock: {
+                    every: {
+                      gudang_id: query.kode_gudang,
+                    },
+                  },
+                },
+                include: {
+                  stock: {
+                    select: {
+                      stok: true,
+                      stok_aman: true,
+                      gudang: {
+                        select: {
+                          kode_gudang: true,
+                          nama: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const { nama, subkategori } = result;
+
+      const produk = [];
+
+      for (const item of subkategori) {
+        produk.push(
+          ...item.produk.map((element) => {
+            const newItem = removeKeys(element, [
+              'id_table',
+              'created_at',
+              'updated_at',
+            ]);
+            const { subkategori_id } = newItem;
+            delete element.subkategori_id;
+
+            return {
+              nama_sub_kategori_produk: item.nama,
+              sub_kategori_produk: subkategori_id,
+              merk: newItem.merk,
+              nama_produk: newItem.nama_produk,
+              kode_item: newItem.kode_item,
+              nama_produk_asli: newItem.nama_produk_asli,
+              kode_supplier: newItem.kode_supplier,
+              satuan_kecil: newItem.satuan_kecil,
+              satuan_besar: newItem.satuan_besar,
+              isi_satuan_besar: newItem.isi_satuan_besar,
+              harga_pokok: !newItem.harga_pokok ? 0 : newItem.harga_pokok,
+              harga_1: !newItem.harga_1 ? 0 : newItem.harga_1,
+              harga_2: !newItem.harga_2 ? 0 : newItem.harga_2,
+              harga_3: !newItem.harga_3 ? 0 : newItem.harga_3,
+              harga_4: !newItem.harga_4 ? 0 : newItem.harga_4,
+              harga_5: !newItem.harga_5 ? 0 : newItem.harga_5,
+              harga_6: !newItem.harga_6 ? 0 : newItem.harga_6,
+              rak: newItem.rak,
+              gudang: newItem.stock.map((item) => {
+                const { stok, stok_aman, gudang } = item;
+
+                return {
+                  stok,
+                  stok_aman,
+                  ...gudang,
+                };
+              }),
+              nama_produk_sebutan: newItem.nama_produk_sebutan,
+              konversi: newItem.konversi,
+              berat: newItem.berat,
+              volume: newItem.volume,
+              tipe: newItem.tipe,
+              barcode: newItem.barcode,
+              kode_pabrik: newItem.kode_pabrik,
+              kode_toko: newItem.kode_toko,
+            };
+          }),
+        );
+      }
+
+      return {
+        id_kategori: result.id_kategori,
+        nama,
+        produk,
+      };
+    }
+
     const result = await this.prisma.kategori.findUnique({
       where: {
-        id_kategori,
+        id_kategori: parseInt(query.id_kategori),
       },
       include: {
         subkategori: {
           include: {
-            produk: true,
+            produk: {
+              include: {
+                stock: {
+                  select: {
+                    stok: true,
+                    stok_aman: true,
+                    gudang: {
+                      select: {
+                        kode_gudang: true,
+                        nama: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
     });
-
-    // const result = [];
-    // for (const item of produk) {
-    //   result.push(
-    //     ...item.produk.map((element) => {
-    //       delete element.id_table;
-    //       delete element.created_at;
-    //       delete element.updated_at;
-
-    //       return {
-    //         ...element,
-    //       };
-    //     }),
-    //   );
-    // }
 
     const { nama, subkategori } = result;
 
@@ -391,43 +653,50 @@ export class ProdukService {
     for (const item of subkategori) {
       produk.push(
         ...item.produk.map((element) => {
-          const { subkategori_id, gudang_id } = element;
-          delete element.id_table;
-          delete element.created_at;
-          delete element.updated_at;
+          const newItem = removeKeys(element, [
+            'id_table',
+            'created_at',
+            'updated_at',
+          ]);
+          const { subkategori_id } = newItem;
           delete element.subkategori_id;
-          delete element.gudang_id;
 
           return {
             nama_sub_kategori_produk: item.nama,
             sub_kategori_produk: subkategori_id,
-            merk: element.merk,
-            nama_produk: element.nama_produk,
-            kode_item: element.kode_item,
-            nama_produk_asli: element.nama_produk_asli,
-            kode_supplier: element.kode_supplier,
-            satuan_kecil: element.satuan_kecil,
-            satuan_besar: element.satuan_besar,
-            isi_satuan_besar: element.isi_satuan_besar,
-            harga_pokok: !element.harga_pokok ? 0 : element.harga_pokok,
-            harga_1: !element.harga_1 ? 0 : element.harga_1,
-            harga_2: !element.harga_2 ? 0 : element.harga_2,
-            harga_3: !element.harga_3 ? 0 : element.harga_3,
-            harga_4: !element.harga_4 ? 0 : element.harga_4,
-            harga_5: !element.harga_5 ? 0 : element.harga_5,
-            harga_6: !element.harga_6 ? 0 : element.harga_6,
-            gudang: gudang_id,
-            rak: element.rak,
-            stok: element.stok,
-            stok_aman: element.stok_aman,
-            nama_produk_sebutan: element.nama_produk_sebutan,
-            konversi: element.konversi,
-            berat: element.berat,
-            volume: element.volume,
-            tipe: element.tipe,
-            barcode: element.barcode,
-            kode_pabrik: element.kode_pabrik,
-            kode_toko: element.kode_toko,
+            merk: newItem.merk,
+            nama_produk: newItem.nama_produk,
+            kode_item: newItem.kode_item,
+            nama_produk_asli: newItem.nama_produk_asli,
+            kode_supplier: newItem.kode_supplier,
+            satuan_kecil: newItem.satuan_kecil,
+            satuan_besar: newItem.satuan_besar,
+            isi_satuan_besar: newItem.isi_satuan_besar,
+            harga_pokok: !newItem.harga_pokok ? 0 : newItem.harga_pokok,
+            harga_1: !newItem.harga_1 ? 0 : newItem.harga_1,
+            harga_2: !newItem.harga_2 ? 0 : newItem.harga_2,
+            harga_3: !newItem.harga_3 ? 0 : newItem.harga_3,
+            harga_4: !newItem.harga_4 ? 0 : newItem.harga_4,
+            harga_5: !newItem.harga_5 ? 0 : newItem.harga_5,
+            harga_6: !newItem.harga_6 ? 0 : newItem.harga_6,
+            rak: newItem.rak,
+            gudang: newItem.stock.map((item) => {
+              const { stok, stok_aman, gudang } = item;
+
+              return {
+                stok,
+                stok_aman,
+                ...gudang,
+              };
+            }),
+            nama_produk_sebutan: newItem.nama_produk_sebutan,
+            konversi: newItem.konversi,
+            berat: newItem.berat,
+            volume: newItem.volume,
+            tipe: newItem.tipe,
+            barcode: newItem.barcode,
+            kode_pabrik: newItem.kode_pabrik,
+            kode_toko: newItem.kode_toko,
           };
         }),
       );
@@ -438,5 +707,67 @@ export class ProdukService {
       nama,
       produk,
     };
+  }
+
+  async getProdukByGudang(query: ProdukQuery) {
+    const result = await this.prisma.stock.findMany({
+      where: {
+        gudang_id: query.kode_gudang,
+      },
+      include: {
+        produk: {
+          include: {
+            subkategori: {
+              select: {
+                nama: true,
+                kategori: {
+                  select: {
+                    nama: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        gudang: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    return result.map((item) => {
+      const { produk, ...all } = removeKeys(item, [
+        'id_table',
+        'created_at',
+        'updated_at',
+        'produk_id',
+        'gudang_id',
+      ]);
+
+      let status_stok: string = '';
+
+      const { stok, stok_aman } = all;
+
+      const warning = Math.round((stok_aman / 100) * 50);
+      const danger = Math.round((stok_aman / 100) * 15);
+
+      if (stok > stok_aman || stok > warning) {
+        status_stok += 'aman';
+      } else if (stok <= warning && stok > danger) {
+        status_stok += 'menipis';
+      } else {
+        status_stok += 'bahaya';
+      }
+
+      return {
+        ...removeKeys(produk, ['id_table', 'subkategori_id', 'subkategori']),
+        ...all,
+        gudang: all.gudang.nama,
+        subkategori: produk.subkategori.nama,
+        kategori: produk.subkategori.kategori.nama,
+        status_stok,
+      };
+    });
   }
 }

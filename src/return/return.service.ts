@@ -19,9 +19,12 @@ export class ReturnService {
     const date = new Date();
 
     for (const produk of body.list_produk) {
-      await this.prisma.produk.update({
+      await this.prisma.stock.updateMany({
         where: {
-          kode_item: produk.kode_item,
+          produk_id: produk.kode_item,
+          gudang: {
+            nama: produk.gudang,
+          },
         },
         data: {
           stok: {

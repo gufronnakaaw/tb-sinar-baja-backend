@@ -52,6 +52,15 @@ export class ProdukController {
         };
       }
 
+      if (query.kode_gudang) {
+        const data = await this.produkService.getProdukByGudang(query);
+        return {
+          success: true,
+          status_code: HttpStatus.OK,
+          data,
+        };
+      }
+
       const data = await this.produkService.getProduk(query);
       return {
         success: true,
@@ -65,11 +74,9 @@ export class ProdukController {
 
   @Get('filter')
   @HttpCode(HttpStatus.OK)
-  async filter(
-    @Query() query: { id_kategori: string },
-  ): Promise<SuccessResponse> {
+  async filter(@Query() query: ProdukQuery): Promise<SuccessResponse> {
     try {
-      const data = await this.produkService.filter(parseInt(query.id_kategori));
+      const data = await this.produkService.filter(query);
       return {
         success: true,
         status_code: HttpStatus.OK,

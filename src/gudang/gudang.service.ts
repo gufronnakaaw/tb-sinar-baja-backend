@@ -11,7 +11,7 @@ export class GudangService {
       include: {
         _count: {
           select: {
-            produk: true,
+            stock: true,
           },
         },
       },
@@ -27,7 +27,7 @@ export class GudangService {
           nama,
           created_at,
           updated_at,
-          can_delete: _count.produk == 0,
+          can_delete: _count.stock == 0,
         };
       },
     );
