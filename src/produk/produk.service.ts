@@ -470,20 +470,6 @@ export class ProdukService {
   }
 
   updateStokProduk(body: UpdateStokProdukType) {
-    if (!body.tipe) {
-      return this.prisma.stock.updateMany({
-        where: {
-          produk_id: body.kode_item,
-          gudang: {
-            nama: body.gudang,
-          },
-        },
-        data: {
-          stok_aman: body.stok_aman,
-        },
-      });
-    }
-
     if (body.tipe == 'increment') {
       return this.prisma.stock.updateMany({
         where: {
@@ -496,6 +482,7 @@ export class ProdukService {
           stok: {
             increment: body.stok,
           },
+          stok_aman: body.stok_aman,
         },
       });
     }
