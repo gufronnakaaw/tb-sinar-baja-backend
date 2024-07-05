@@ -72,19 +72,16 @@ model Produk {
   harga_5                 Int?          @db.UnsignedInt
   harga_6                 Int?          @db.UnsignedInt
   harga_diskon            Int?          @db.UnsignedInt
-  stok                    Float?        @db.Float()
-  stok_aman               Int?          @db.UnsignedInt
   berat                   Int?          @db.UnsignedInt
   volume                  Int?          @db.UnsignedInt
-  gudang_id               String        @db.VarChar(255)
   rak                     String        @db.VarChar(255)
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
   subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Restrict)
-  gudang                  Gudang        @relation(fields: [gudang_id], references: [kode_gudang], onUpdate: NoAction, onDelete: Restrict)
   pricelist               Pricelist[]
   hargaquantity           HargaQuantity[]
+  stock                   Stock[]
 
   @@map("produk")        
 }
@@ -96,9 +93,25 @@ model Gudang {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  produk                  Produk[]
+  stock                   Stock[]
 
   @@map("gudang")
+}
+
+model Stock {
+  id_table                Int           @id               @default(autoincrement())
+  stok                    Float         @db.Float()
+  stok_aman               Int?          @db.UnsignedInt
+  gudang_id               String
+  produk_id               String
+  
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  produk                  Produk        @relation(fields: [produk_id], references: [kode_item])
+  gudang                  Gudang        @relation(fields: [gudang_id], references: [kode_gudang])
+
+  @@map("stock")
 }
 
 model Transaksi {
