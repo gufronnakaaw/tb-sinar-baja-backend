@@ -530,7 +530,7 @@ export class ProdukService {
               produk: {
                 where: {
                   stock: {
-                    every: {
+                    some: {
                       gudang_id: query.kode_gudang,
                     },
                   },
@@ -567,8 +567,12 @@ export class ProdukService {
               'created_at',
               'updated_at',
             ]);
-            const { subkategori_id } = newItem;
+            const { subkategori_id, stock } = newItem;
             delete element.subkategori_id;
+
+            const filterStock = stock.find(
+              (el) => el.gudang.kode_gudang == query.kode_gudang,
+            );
 
             return {
               nama_sub_kategori_produk: item.nama,
@@ -589,15 +593,8 @@ export class ProdukService {
               harga_5: !newItem.harga_5 ? 0 : newItem.harga_5,
               harga_6: !newItem.harga_6 ? 0 : newItem.harga_6,
               rak: newItem.rak,
-              gudang: newItem.stock.map((item) => {
-                const { stok, stok_aman, gudang } = item;
-
-                return {
-                  stok,
-                  stok_aman,
-                  ...gudang,
-                };
-              }),
+              stok: filterStock.stok,
+              stok_aman: filterStock.stok_aman,
               nama_produk_sebutan: newItem.nama_produk_sebutan,
               konversi: newItem.konversi,
               berat: newItem.berat,
