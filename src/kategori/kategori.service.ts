@@ -18,13 +18,13 @@ export class KategoriService {
   constructor(private prisma: PrismaService) {}
 
   async getKategori(query: KategoriQuery) {
-    const defaultPage = 1;
-    const defaultSize = 10;
+    // const defaultPage = 1;
+    // const defaultSize = 10;
 
-    const page = parseInt(query.page) ? parseInt(query.page) : defaultPage;
-    const size = parseInt(query.size) ? parseInt(query.size) : defaultSize;
+    // const page = parseInt(query.page) ? parseInt(query.page) : defaultPage;
+    // const size = parseInt(query.size) ? parseInt(query.size) : defaultSize;
 
-    const skip = (page - 1) * size;
+    // const skip = (page - 1) * size;
 
     if (query.id_kategori) {
       const kategori = await this.prisma.kategori.findFirst({
@@ -53,20 +53,20 @@ export class KategoriService {
       };
     }
 
-    const [total, kategori] = await this.prisma.$transaction([
-      this.prisma.kategori.count(),
-      this.prisma.kategori.findMany({
-        select: {
-          id_kategori: true,
-          nama: true,
-          created_at: true,
-          updated_at: true,
-        },
-        orderBy: {
-          id_kategori: 'desc',
-        },
-      }),
-    ]);
+    // const [total, kategori] = await this.prisma.$transaction([
+    //   this.prisma.kategori.count(),
+    //   this.prisma.kategori.findMany({
+    //     select: {
+    //       id_kategori: true,
+    //       nama: true,
+    //       created_at: true,
+    //       updated_at: true,
+    //     },
+    //     orderBy: {
+    //       id_kategori: 'desc',
+    //     },
+    //   }),
+    // ]);
 
     // {
     //   kategori,
@@ -75,7 +75,17 @@ export class KategoriService {
     //   total_page: Math.ceil(total / size),
     // };
 
-    return kategori;
+    return this.prisma.kategori.findMany({
+      select: {
+        id_kategori: true,
+        nama: true,
+        created_at: true,
+        updated_at: true,
+      },
+      orderBy: {
+        id_kategori: 'desc',
+      },
+    });
   }
 
   async createKategori(body: CreateKategoriType) {
@@ -236,7 +246,7 @@ export class KategoriService {
     }
 
     for (const subkategori of body.subkategori) {
-      const create = {};
+      const create: any = {};
 
       const lastSubKategori = await this.prisma.subKategori.findMany({
         where: {
