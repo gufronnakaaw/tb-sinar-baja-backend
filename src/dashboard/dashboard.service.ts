@@ -26,26 +26,31 @@ export class DashboardService {
 
   async getOwnerDashboard(): Promise<OwnerDashboardDto> {
     const omzet = await this.getOmzet();
+    const hutang = await this.getHutang();
+    const piutang = await this.getPiutang();
+
     return {
       status_stok: 'aman',
       omzet: !omzet ? 0 : omzet,
       laba_kotor: 0,
       barang_rusak: 0,
-      hutang: 0,
+      hutang: !hutang ? 0 : hutang,
       estimasi_rugi: 0,
-      piutang: 0,
+      piutang: !piutang ? 0 : piutang,
     };
   }
 
   async getAdminDashboard(): Promise<AdminDashboardDto> {
     const omzet = await this.getOmzet();
+    const hutang = await this.getHutang();
+    const piutang = await this.getPiutang();
 
     return {
       status_stok: 'aman',
       omzet: !omzet ? 0 : omzet,
       barang_rusak: 0,
-      hutang: 0,
-      piutang: 10,
+      hutang: !hutang ? 0 : hutang,
+      piutang: !piutang ? 0 : piutang,
     };
   }
 
@@ -67,5 +72,25 @@ export class DashboardService {
     });
 
     return omzet._sum.total_pembayaran;
+  }
+
+  async getHutang() {
+    const hutang = await this.prisma.invoice.aggregate({
+      _sum: {
+        sisa: true,
+      },
+    });
+
+    return hutang._sum.sisa;
+  }
+
+  async getPiutang() {
+    const piutang = await this.prisma.invoiceKeluar.aggregate({
+      _sum: {
+        sisa: true,
+      },
+    });
+
+    return piutang._sum.sisa;
   }
 }
