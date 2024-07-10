@@ -15,6 +15,7 @@ import { PenawaranModule } from './penawaran/penawaran.module';
 import { PreorderModule } from './preorder/preorder.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { ReturnModule } from './return/return.module';
+import { BeritaacaraModule } from './beritaacara/beritaacara.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReturnModule } from './return/return.module';
     PreorderModule,
     InvoiceModule,
     ReturnModule,
+    BeritaacaraModule,
   ],
   controllers: [AppController],
   providers: [],
