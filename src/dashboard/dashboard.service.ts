@@ -28,15 +28,17 @@ export class DashboardService {
     const omzet = await this.getOmzet();
     const hutang = await this.getHutang();
     const piutang = await this.getPiutang();
+    const rusak = await this.getBarangRusak();
+    const estimasi = await this.getEstimasiRugi();
 
     return {
       status_stok: 'aman',
-      omzet: !omzet ? 0 : omzet,
+      omzet: omzet ?? 0,
       laba_kotor: 0,
-      barang_rusak: 0,
-      hutang: !hutang ? 0 : hutang,
-      estimasi_rugi: 0,
-      piutang: !piutang ? 0 : piutang,
+      barang_rusak: rusak ?? 0,
+      hutang: hutang ?? 0,
+      estimasi_rugi: estimasi ?? 0,
+      piutang: piutang ?? 0,
     };
   }
 
@@ -44,23 +46,25 @@ export class DashboardService {
     const omzet = await this.getOmzet();
     const hutang = await this.getHutang();
     const piutang = await this.getPiutang();
+    const rusak = await this.getBarangRusak();
 
     return {
       status_stok: 'aman',
-      omzet: !omzet ? 0 : omzet,
-      barang_rusak: 0,
-      hutang: !hutang ? 0 : hutang,
-      piutang: !piutang ? 0 : piutang,
+      omzet: omzet ?? 0,
+      barang_rusak: rusak ?? 0,
+      hutang: hutang ?? 0,
+      piutang: piutang ?? 0,
     };
   }
 
   async getCashierDashboard(): Promise<CashierDashboardDto> {
     const omzet = await this.getOmzet();
+    const rusak = await this.getBarangRusak();
 
     return {
       status_stok: 'aman',
-      omzet: !omzet ? 0 : omzet,
-      barang_rusak: 0,
+      omzet: omzet ?? 0,
+      barang_rusak: rusak ?? 0,
     };
   }
 
@@ -92,5 +96,25 @@ export class DashboardService {
     });
 
     return piutang._sum.sisa;
+  }
+
+  async getBarangRusak() {
+    const rusak = await this.prisma.beritaAcaraDetail.aggregate({
+      _sum: {
+        jumlah: true,
+      },
+    });
+
+    return rusak._sum.jumlah;
+  }
+
+  async getEstimasiRugi() {
+    const estimasi = await this.prisma.beritaAcaraDetail.aggregate({
+      _sum: {
+        total: true,
+      },
+    });
+
+    return estimasi._sum.total;
   }
 }
