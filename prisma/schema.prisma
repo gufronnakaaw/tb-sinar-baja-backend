@@ -480,3 +480,33 @@ model ReturnDetail {
   
   @@map("returndetail")
 }
+
+model BeritaAcara {
+  id_table                Int           @id               @default(autoincrement())
+  id_ba                   String        @db.VarChar(255)  @unique
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  beritaacaradetail       BeritaAcaraDetail[]
+  @@map("beritaacara")
+}
+
+model BeritaAcaraDetail {
+  id_table                Int           @id               @default(autoincrement())
+  ba_id                   String
+  jumlah                  Float         @db.Float()
+  satuan                  String        @db.VarChar(255)
+  nama_produk             String        @db.VarChar(255)
+  kode_item               String        @db.VarChar(255)
+  gudang                  String        @db.VarChar(255)
+  rak                     String?       @db.VarChar(255)
+  harga                   Int           @db.UnsignedInt
+  alasan                  String        @db.VarChar(255)
+  tipe_harga              String        @db.VarChar(255)
+  total                   Int           @db.UnsignedInt
+
+  beritaacara             BeritaAcara   @relation(fields: [ba_id], references: [id_ba])
+
+  @@map("beritaacaradetail")
+}
