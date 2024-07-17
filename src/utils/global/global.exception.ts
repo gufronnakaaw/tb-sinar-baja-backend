@@ -71,7 +71,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           message: exception.message,
           errors: {
             code: exception.code,
-            meta: exception.meta?.target,
+            meta: exception.meta,
             stack: exception.stack,
           },
         },
