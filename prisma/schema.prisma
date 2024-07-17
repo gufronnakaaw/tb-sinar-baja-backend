@@ -109,7 +109,7 @@ model Stock {
   updated_at              DateTime      @updatedAt
 
   produk                  Produk        @relation(fields: [produk_id], references: [kode_item])
-  gudang                  Gudang        @relation(fields: [gudang_id], references: [kode_gudang])
+  gudang                  Gudang?        @relation(fields: [gudang_id], references: [kode_gudang])
 
   @@map("stock")
 }
