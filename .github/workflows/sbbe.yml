@@ -17,6 +17,7 @@ jobs:
             cd /home/rodaharapansemesta/tb-sinar-baja-backend
             git pull
             git status
+            npm install
             npx prisma generate
             npm run build
             pm2 restart sb-be
