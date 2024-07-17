@@ -118,6 +118,110 @@ export class ProdukService {
     };
   }
 
+  async createBulkProdukV2({ gudang_id, produk }: CreateBulkProduk) {
+    for (const item of produk) {
+      const data = {
+        barcode: item.barcode,
+        kode_pabrik: item.kode_pabrik,
+        kode_toko: item.kode_toko,
+        kode_supplier: item.kode_supplier,
+        nama_produk: item.nama_produk,
+        nama_produk_asli: item.nama_produk_asli,
+        nama_produk_sebutan: item.nama_produk_sebutan,
+        rak: item.rak,
+        harga_1: item.harga_1,
+        harga_2: item.harga_2,
+        harga_3: item.harga_3,
+        harga_4: item.harga_4,
+        harga_5: item.harga_5,
+        harga_6: item.harga_6,
+        harga_pokok: item.harga_pokok,
+        harga_diskon: item.harga_diskon,
+        berat: item.berat,
+        volume: item.volume,
+        konversi: item.konversi,
+        isi_satuan_besar: item.isi_satuan_besar,
+        merk: item.merk,
+        satuan_besar: item.satuan_besar,
+        satuan_kecil: item.satuan_kecil,
+        tipe: item.tipe,
+        subkategori_id: item.subkategori_id,
+      };
+
+      const produk = await this.prisma.produk.count({
+        where: {
+          kode_item: item.kode_item,
+        },
+      });
+
+      if (!produk) {
+        await this.prisma.produk.create({
+          data: {
+            kode_item: item.kode_item,
+            ...data,
+            stock: {
+              create: {
+                stok: item.stok,
+                stok_aman: item.stok_aman,
+                gudang_id: gudang_id,
+              },
+            },
+          },
+        });
+      } else {
+        const stock = await this.prisma.stock.count({
+          where: {
+            produk_id: item.kode_item,
+            gudang_id: gudang_id,
+          },
+        });
+
+        if (!stock) {
+          await this.prisma.produk.update({
+            where: {
+              kode_item: item.kode_item,
+            },
+            data: {
+              ...data,
+              stock: {
+                create: {
+                  stok: item.stok,
+                  stok_aman: item.stok_aman,
+                  gudang_id: gudang_id,
+                },
+              },
+            },
+          });
+        } else {
+          await this.prisma.produk.update({
+            where: {
+              kode_item: item.kode_item,
+            },
+            data: {
+              ...data,
+              stock: {
+                updateMany: {
+                  where: {
+                    produk_id: item.kode_item,
+                    gudang_id: gudang_id,
+                  },
+                  data: {
+                    stok: item.stok,
+                    stok_aman: item.stok_aman,
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+    }
+
+    return {
+      total: produk.length,
+    };
+  }
+
   async createSingleProduk(item: any) {
     await this.prisma.produk.create(item);
   }
