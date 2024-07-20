@@ -74,7 +74,6 @@ model Produk {
   harga_diskon            Int?          @db.UnsignedInt
   berat                   Int?          @db.UnsignedInt
   volume                  Int?          @db.UnsignedInt
-  rak                     String        @db.VarChar(255)
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
@@ -104,6 +103,7 @@ model Stock {
   stok_aman               Int?          @db.UnsignedInt
   gudang_id               String
   produk_id               String
+  rak                     String?
   
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
