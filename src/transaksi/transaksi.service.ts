@@ -206,19 +206,47 @@ export class TransaksiService {
 
     const date = new Date();
 
+    const data = [];
+
     for (const produk of body.list_produk) {
-      await this.prisma.stock.updateMany({
-        where: {
-          produk_id: produk.kode_item,
-          gudang: {
-            nama: produk.gudang,
+      const [stock, update] = await this.prisma.$transaction([
+        this.prisma.stock.findMany({
+          select: {
+            rak: true,
           },
-        },
-        data: {
-          stok: {
-            decrement: produk.jumlah,
+          where: {
+            produk_id: produk.kode_item,
+            gudang: {
+              nama: produk.gudang,
+            },
           },
-        },
+        }),
+        this.prisma.stock.updateMany({
+          where: {
+            produk_id: produk.kode_item,
+            gudang: {
+              nama: produk.gudang,
+            },
+          },
+          data: {
+            stok: {
+              decrement: produk.jumlah,
+            },
+          },
+        }),
+      ]);
+
+      data.push({
+        diskon_langsung_item: produk.diskon_langsung_item,
+        diskon_persen_item: produk.diskon_persen_item,
+        jumlah: produk.jumlah,
+        satuan: produk.satuan,
+        kode_item: produk.kode_item,
+        nama_produk: produk.nama_produk,
+        gudang: produk.gudang,
+        rak: stock[0].rak,
+        harga: produk.harga,
+        sub_total: produk.sub_total,
       });
     }
 
@@ -257,20 +285,7 @@ export class TransaksiService {
                 estimasi: body.estimasi,
                 transaksidetail: {
                   createMany: {
-                    data: body.list_produk.map((produk) => {
-                      return {
-                        diskon_langsung_item: produk.diskon_langsung_item,
-                        diskon_persen_item: produk.diskon_persen_item,
-                        jumlah: produk.jumlah,
-                        satuan: produk.satuan,
-                        kode_item: produk.kode_item,
-                        nama_produk: produk.nama_produk,
-                        gudang: produk.gudang,
-                        rak: produk.rak,
-                        harga: produk.harga,
-                        sub_total: produk.sub_total,
-                      };
-                    }),
+                    data,
                   },
                 },
                 suratjalan: {
@@ -358,20 +373,7 @@ export class TransaksiService {
                 estimasi: body.estimasi,
                 transaksidetail: {
                   createMany: {
-                    data: body.list_produk.map((produk) => {
-                      return {
-                        diskon_langsung_item: produk.diskon_langsung_item,
-                        diskon_persen_item: produk.diskon_persen_item,
-                        jumlah: produk.jumlah,
-                        satuan: produk.satuan,
-                        kode_item: produk.kode_item,
-                        nama_produk: produk.nama_produk,
-                        gudang: produk.gudang,
-                        rak: produk.rak,
-                        harga: produk.harga,
-                        sub_total: produk.sub_total,
-                      };
-                    }),
+                    data,
                   },
                 },
                 suratjalan: {
@@ -452,20 +454,7 @@ export class TransaksiService {
               estimasi: body.estimasi,
               transaksidetail: {
                 createMany: {
-                  data: body.list_produk.map((produk) => {
-                    return {
-                      diskon_langsung_item: produk.diskon_langsung_item,
-                      diskon_persen_item: produk.diskon_persen_item,
-                      jumlah: produk.jumlah,
-                      satuan: produk.satuan,
-                      kode_item: produk.kode_item,
-                      nama_produk: produk.nama_produk,
-                      gudang: produk.gudang,
-                      rak: produk.rak,
-                      harga: produk.harga,
-                      sub_total: produk.sub_total,
-                    };
-                  }),
+                  data,
                 },
               },
               suratjalan: {
@@ -547,20 +536,7 @@ export class TransaksiService {
           estimasi: body.estimasi,
           transaksidetail: {
             createMany: {
-              data: body.list_produk.map((produk) => {
-                return {
-                  diskon_langsung_item: produk.diskon_langsung_item,
-                  diskon_persen_item: produk.diskon_persen_item,
-                  jumlah: produk.jumlah,
-                  satuan: produk.satuan,
-                  kode_item: produk.kode_item,
-                  nama_produk: produk.nama_produk,
-                  gudang: produk.gudang,
-                  rak: produk.rak,
-                  harga: produk.harga,
-                  sub_total: produk.sub_total,
-                };
-              }),
+              data,
             },
           },
           suratjalan: {

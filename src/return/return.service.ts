@@ -18,19 +18,51 @@ export class ReturnService {
 
     const date = new Date();
 
-    for (const produk of body.list_produk) {
-      await this.prisma.stock.updateMany({
-        where: {
-          produk_id: produk.kode_item,
-          gudang: {
-            nama: produk.gudang,
+    const data = [];
+
+    for (const item of body.list_produk) {
+      const [stock, update] = await this.prisma.$transaction([
+        this.prisma.stock.findMany({
+          select: {
+            rak: true,
           },
-        },
-        data: {
-          stok: {
-            increment: produk.dikembalikan,
+          where: {
+            produk_id: item.kode_item,
+            gudang: {
+              nama: item.gudang,
+            },
           },
-        },
+        }),
+        this.prisma.stock.updateMany({
+          where: {
+            produk_id: item.kode_item,
+            gudang: {
+              nama: item.gudang,
+            },
+          },
+          data: {
+            stok: {
+              increment: item.dikembalikan,
+            },
+          },
+        }),
+      ]);
+
+      data.push({
+        nama_produk: item.nama_produk,
+        kode_item: item.kode_item,
+        harga: item.harga,
+        harga_setelah_diskon: item.harga_setelah_diskon,
+        diskon_langsung_item: item.diskon_langsung_item,
+        diskon_persen_item: item.diskon_persen_item,
+        penalti_item: item.penalti,
+        jumlah: item.dikembalikan,
+        gudang: item.gudang,
+        rak: stock[0].rak,
+        satuan: item.satuan,
+        sub_total: item.sub_total,
+        total_pengembalian: item.total_pengembalian,
+        diskon_per_item: item.diskon_per_item,
       });
     }
 
@@ -49,24 +81,7 @@ export class ReturnService {
         updated_at: date,
         returndetail: {
           createMany: {
-            data: body.list_produk.map((item) => {
-              return {
-                nama_produk: item.nama_produk,
-                kode_item: item.kode_item,
-                harga: item.harga,
-                harga_setelah_diskon: item.harga_setelah_diskon,
-                diskon_langsung_item: item.diskon_langsung_item,
-                diskon_persen_item: item.diskon_persen_item,
-                penalti_item: item.penalti,
-                jumlah: item.dikembalikan,
-                gudang: item.gudang,
-                rak: item.rak,
-                satuan: item.satuan,
-                sub_total: item.sub_total,
-                total_pengembalian: item.total_pengembalian,
-                diskon_per_item: item.diskon_per_item,
-              };
-            }),
+            data,
           },
         },
       },

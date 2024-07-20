@@ -22,7 +22,6 @@ export class ProdukService {
         nama_produk: item.nama_produk,
         nama_produk_asli: item.nama_produk_asli,
         nama_produk_sebutan: item.nama_produk_sebutan,
-        rak: item.rak,
         harga_1: item.harga_1,
         harga_2: item.harga_2,
         harga_3: item.harga_3,
@@ -58,6 +57,7 @@ export class ProdukService {
                 stok: item.stok,
                 stok_aman: item.stok_aman,
                 gudang_id: body.gudang_id,
+                rak: item.rak,
               },
             },
           },
@@ -82,6 +82,7 @@ export class ProdukService {
                   stok: item.stok,
                   stok_aman: item.stok_aman,
                   gudang_id: body.gudang_id,
+                  rak: item.rak,
                 },
               },
             },
@@ -102,6 +103,7 @@ export class ProdukService {
                   data: {
                     stok: item.stok,
                     stok_aman: item.stok_aman,
+                    rak: item.rak,
                   },
                 },
               },
@@ -128,7 +130,6 @@ export class ProdukService {
         nama_produk: item.nama_produk,
         nama_produk_asli: item.nama_produk_asli,
         nama_produk_sebutan: item.nama_produk_sebutan,
-        rak: item.rak,
         harga_1: item.harga_1,
         harga_2: item.harga_2,
         harga_3: item.harga_3,
@@ -164,6 +165,7 @@ export class ProdukService {
                 stok: item.stok,
                 stok_aman: item.stok_aman,
                 gudang_id: gudang_id,
+                rak: item.rak,
               },
             },
           },
@@ -188,6 +190,7 @@ export class ProdukService {
                   stok: item.stok,
                   stok_aman: item.stok_aman,
                   gudang_id: gudang_id,
+                  rak: item.rak,
                 },
               },
             },
@@ -208,6 +211,7 @@ export class ProdukService {
                   data: {
                     stok: item.stok,
                     stok_aman: item.stok_aman,
+                    rak: item.rak,
                   },
                 },
               },
@@ -247,6 +251,7 @@ export class ProdukService {
           select: {
             stok: true,
             stok_aman: true,
+            rak: true,
             gudang: {
               select: {
                 nama: true,
@@ -268,9 +273,9 @@ export class ProdukService {
     let total_stok_aman = 0;
 
     for (const item of stock) {
-      const { stok, stok_aman } = item;
+      const { stok, stok_aman, rak } = item;
 
-      gudang.push({ stok, stok_aman, ...item.gudang });
+      gudang.push({ stok, stok_aman, rak, ...item.gudang });
 
       total_stok += item.stok;
       total_stok_aman += item.stok_aman;
@@ -305,6 +310,7 @@ export class ProdukService {
           select: {
             stok: true,
             stok_aman: true,
+            rak: true,
             gudang: {
               select: {
                 nama: true,
@@ -327,9 +333,9 @@ export class ProdukService {
       let total_stok_aman = 0;
 
       for (const item of stock) {
-        const { stok, stok_aman } = item;
+        const { stok, stok_aman, rak } = item;
 
-        gudang.push({ stok, stok_aman, ...item.gudang });
+        gudang.push({ stok, stok_aman, rak, ...item.gudang });
 
         total_stok += item.stok;
         total_stok_aman += item.stok_aman;
@@ -382,6 +388,7 @@ export class ProdukService {
             select: {
               stok: true,
               stok_aman: true,
+              rak: true,
               gudang: {
                 select: {
                   nama: true,
@@ -448,7 +455,7 @@ export class ProdukService {
         for (const item of stock) {
           let status_stok: string = '';
 
-          const { stok, stok_aman } = item;
+          const { stok, stok_aman, rak } = item;
 
           const warning = Math.round((stok_aman / 100) * 50);
           const danger = Math.round((stok_aman / 100) * 15);
@@ -461,7 +468,7 @@ export class ProdukService {
             status_stok += 'bahaya';
           }
 
-          gudang.push({ stok, stok_aman, ...item.gudang, status_stok });
+          gudang.push({ stok, stok_aman, rak, ...item.gudang, status_stok });
 
           total_stok += item.stok;
           total_stok_aman += item.stok_aman;
@@ -496,6 +503,7 @@ export class ProdukService {
             select: {
               stok: true,
               stok_aman: true,
+              rak: true,
               gudang: {
                 select: {
                   nama: true,
@@ -525,7 +533,7 @@ export class ProdukService {
       for (const item of stock) {
         let status_stok: string = '';
 
-        const { stok, stok_aman } = item;
+        const { stok, stok_aman, rak } = item;
 
         const warning = Math.round((stok_aman / 100) * 50);
         const danger = Math.round((stok_aman / 100) * 15);
@@ -538,7 +546,7 @@ export class ProdukService {
           status_stok += 'bahaya';
         }
 
-        gudang.push({ stok, stok_aman, ...item.gudang, status_stok });
+        gudang.push({ stok, stok_aman, rak, ...item.gudang, status_stok });
 
         total_stok += item.stok;
         total_stok_aman += item.stok_aman;
@@ -631,6 +639,7 @@ export class ProdukService {
                     select: {
                       stok: true,
                       stok_aman: true,
+                      rak: true,
                       gudang: {
                         select: {
                           kode_gudang: true,
@@ -683,7 +692,7 @@ export class ProdukService {
               harga_4: !newItem.harga_4 ? 0 : newItem.harga_4,
               harga_5: !newItem.harga_5 ? 0 : newItem.harga_5,
               harga_6: !newItem.harga_6 ? 0 : newItem.harga_6,
-              rak: newItem.rak,
+              rak: filterStock.rak,
               stok: filterStock.stok,
               stok_aman: filterStock.stok_aman,
               nama_produk_sebutan: newItem.nama_produk_sebutan,
@@ -719,6 +728,7 @@ export class ProdukService {
                   select: {
                     stok: true,
                     stok_aman: true,
+                    rak: true,
                     gudang: {
                       select: {
                         kode_gudang: true,
@@ -767,13 +777,13 @@ export class ProdukService {
             harga_4: !newItem.harga_4 ? 0 : newItem.harga_4,
             harga_5: !newItem.harga_5 ? 0 : newItem.harga_5,
             harga_6: !newItem.harga_6 ? 0 : newItem.harga_6,
-            rak: newItem.rak,
             gudang: newItem.stock.map((item) => {
-              const { stok, stok_aman, gudang } = item;
+              const { stok, stok_aman, gudang, rak } = item;
 
               return {
                 stok,
                 stok_aman,
+                rak,
                 ...gudang,
               };
             }),

@@ -91,6 +91,35 @@ export class BeritaacaraService {
     }
 
     const date = new Date();
+    const data = [];
+
+    for (const item of body.list_produk) {
+      const stock = await this.prisma.stock.findMany({
+        select: {
+          rak: true,
+        },
+        where: {
+          produk_id: item.kode_item,
+          gudang: {
+            nama: item.gudang,
+          },
+        },
+      });
+
+      data.push({
+        kode_item: item.kode_item,
+        nama_produk: item.nama_produk,
+        jumlah: item.jumlah,
+        satuan: item.satuan,
+        harga: item.harga,
+        tipe_harga: item.tipe_harga,
+        gudang: item.gudang,
+        alasan: item.alasan,
+        rak: stock[0].rak,
+        total: item.jumlah * item.harga,
+      });
+    }
+
     return this.prisma.beritaAcara.create({
       data: {
         id_ba: generateID('BA', date),
@@ -98,20 +127,7 @@ export class BeritaacaraService {
         updated_at: date,
         beritaacaradetail: {
           createMany: {
-            data: body.list_produk.map((item) => {
-              return {
-                kode_item: item.kode_item,
-                nama_produk: item.nama_produk,
-                jumlah: item.jumlah,
-                satuan: item.satuan,
-                harga: item.harga,
-                tipe_harga: item.tipe_harga,
-                gudang: item.gudang,
-                alasan: item.alasan,
-                rak: item.rak,
-                total: item.jumlah * item.harga,
-              };
-            }),
+            data,
           },
         },
       },
