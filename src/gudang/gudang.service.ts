@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { generateID } from 'src/utils/generate.util';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreateGudangDto, UpdateGudangDto } from './gudang.dto';
+import { CreateEntryDto, CreateGudangDto, UpdateGudangDto } from './gudang.dto';
 
 @Injectable()
 export class GudangService {
@@ -106,6 +107,63 @@ export class GudangService {
         created_at: true,
         updated_at: true,
       },
+    });
+  }
+
+  async getEntry() {
+    return this.prisma.entry.findMany({
+      select: {
+        kode_item: true,
+        nama_produk: true,
+        jumlah: true,
+        created_at: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+
+  async createEntry({ produk_baik, produk_rusak }: CreateEntryDto) {
+    const date = new Date();
+
+    if (produk_rusak.length) {
+      await this.prisma.beritaAcara.create({
+        data: {
+          id_ba: generateID('BA', date),
+          created_at: date,
+          updated_at: date,
+          type: 'external',
+          beritaacaradetail: {
+            createMany: {
+              data: produk_rusak.map((item) => {
+                return {
+                  kode_item: item.kode_item,
+                  nama_produk: item.nama_produk,
+                  jumlah: item.jumlah_rusak,
+                  satuan: item.satuan_rusak,
+                  alasan: 'string',
+                  gudang: 'string',
+                  harga: 0,
+                  tipe_harga: 'string',
+                  total: 0,
+                  rak: 'string',
+                };
+              }),
+            },
+          },
+        },
+      });
+    }
+
+    return this.prisma.entry.createMany({
+      data: produk_baik.map((item) => {
+        return {
+          kode_item: item.kode_item,
+          nama_produk: item.nama_produk,
+          jumlah: item.jumlah_entry,
+        };
+      }),
     });
   }
 }

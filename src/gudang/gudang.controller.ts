@@ -13,6 +13,7 @@ import {
 import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
+  CreateEntryDto,
   CreateGudangDto,
   UpdateGudangDto,
   updateGudangSchema,
@@ -76,6 +77,49 @@ export class GudangController {
         success: true,
         status_code: HttpStatus.OK,
         data: await this.gudangService.deleteGudang(kode_gudang),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('entry')
+  @HttpCode(HttpStatus.OK)
+  async indexEntry(): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.gudangService.getEntry(),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('entry')
+  @HttpCode(HttpStatus.CREATED)
+  async storeEntry(@Body() body: CreateEntryDto): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.gudangService.createEntry(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('stok')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateGudangSchema))
+  async updateStok(@Body() body: UpdateGudangDto): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.gudangService.updateGudang(body),
       };
     } catch (error) {
       throw error;

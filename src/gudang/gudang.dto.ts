@@ -13,3 +13,38 @@ export const updateGudangSchema = z.object({
 });
 
 export type UpdateGudangDto = z.infer<typeof updateGudangSchema>;
+
+export const createEntrySchema = z.object({
+  produk_baik: z
+    .array(
+      z.object({
+        kode_item: z.string(),
+        nama_produk: z.string().trim(),
+        jumlah_entry: z.number().positive(),
+      }),
+    )
+    .min(1),
+  produk_rusak: z.array(
+    z.object({
+      kode_item: z.string(),
+      nama_produk: z.string().trim(),
+      jumlah_rusak: z.number().positive(),
+      satuan_rusak: z.string(),
+    }),
+  ),
+});
+
+export type CreateEntryDto = z.infer<typeof createEntrySchema>;
+
+export const updateStokGudang = z.object({
+  list_produk: z
+    .array(
+      z.object({
+        kode_item: z.string(),
+        nama_produk: z.string().trim(),
+        jumlah: z.number().positive(),
+        gudang: z.string(),
+      }),
+    )
+    .min(1),
+});

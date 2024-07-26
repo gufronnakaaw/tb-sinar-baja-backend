@@ -484,6 +484,7 @@ model ReturnDetail {
 model BeritaAcara {
   id_table                Int           @id               @default(autoincrement())
   id_ba                   String        @db.VarChar(255)  @unique
+  type                    String?       @db.VarChar(255)  @default("internal")
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
@@ -509,4 +510,16 @@ model BeritaAcaraDetail {
   beritaacara             BeritaAcara   @relation(fields: [ba_id], references: [id_ba])
 
   @@map("beritaacaradetail")
+}
+
+model Entry {
+  id_table                Int           @id               @default(autoincrement())
+  kode_item               String        @db.VarChar(255)
+  nama_produk             String        @db.VarChar(255)
+  jumlah                  Float         @db.Float()
+
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+
+  @@map("entry")
 }

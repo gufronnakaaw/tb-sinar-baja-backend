@@ -13,6 +13,7 @@ export class BeritaacaraService {
         id_ba: true,
         created_at: true,
         updated_at: true,
+        type: true,
         beritaacaradetail: {
           select: {
             jumlah: true,
@@ -24,14 +25,17 @@ export class BeritaacaraService {
       },
     });
 
-    return ba.map(({ id_ba, created_at, updated_at, beritaacaradetail }) => {
-      return {
-        id_ba,
-        jumlah_barang: beritaacaradetail.reduce((a, b) => a + b.jumlah, 0),
-        created_at,
-        updated_at,
-      };
-    });
+    return ba.map(
+      ({ id_ba, created_at, updated_at, beritaacaradetail, type }) => {
+        return {
+          id_ba,
+          jumlah_barang: beritaacaradetail.reduce((a, b) => a + b.jumlah, 0),
+          type,
+          created_at,
+          updated_at,
+        };
+      },
+    );
   }
 
   async getBeritaAcaraById(id_ba: string) {
@@ -40,6 +44,7 @@ export class BeritaacaraService {
       created_at,
       updated_at,
       beritaacaradetail,
+      type,
     } = await this.prisma.beritaAcara.findUnique({
       where: {
         id_ba,
@@ -48,6 +53,7 @@ export class BeritaacaraService {
         id_ba: true,
         created_at: true,
         updated_at: true,
+        type: true,
         beritaacaradetail: {
           select: {
             kode_item: true,
@@ -67,6 +73,7 @@ export class BeritaacaraService {
 
     return {
       id_ba: id_beritaacara,
+      type,
       created_at,
       updated_at,
       list_produk: beritaacaradetail,
