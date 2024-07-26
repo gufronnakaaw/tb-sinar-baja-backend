@@ -111,20 +111,50 @@ export class GudangService {
   }
 
   async getEntry() {
-    return this.prisma.entry.findMany({
+    const results = [];
+
+    const produk = await this.prisma.entry.findMany({
+      where: {
+        status: 'show',
+      },
       select: {
         kode_item: true,
         nama_produk: true,
         jumlah: true,
         created_at: true,
       },
-      orderBy: {
-        created_at: 'desc',
-      },
     });
+
+    for (const [index, item] of produk.entries()) {
+      const { kode_item } = item;
+
+      const stok = await this.prisma.stock.findMany({
+        where: {
+          produk_id: kode_item,
+        },
+        select: {
+          gudang: {
+            select: {
+              nama: true,
+            },
+          },
+        },
+      });
+
+      results.push({
+        ...produk[index],
+        gudang: stok.map((el) => el.gudang.nama),
+      });
+    }
+
+    return results;
   }
 
-  async createEntry({ produk_baik, produk_rusak }: CreateEntryDto) {
+  async createEntry({
+    produk_baik,
+    produk_rusak,
+    preorder_id,
+  }: CreateEntryDto) {
     const date = new Date();
 
     if (produk_rusak.length) {
@@ -162,6 +192,7 @@ export class GudangService {
           kode_item: item.kode_item,
           nama_produk: item.nama_produk,
           jumlah: item.jumlah_entry,
+          preorder_id,
         };
       }),
     });

@@ -14,7 +14,9 @@ import { SuccessResponse } from '../utils/global/global.response';
 import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
   CreateEntryDto,
+  createEntrySchema,
   CreateGudangDto,
+  createGudangSchema,
   UpdateGudangDto,
   updateGudangSchema,
 } from './gudang.dto';
@@ -40,6 +42,7 @@ export class GudangController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(createGudangSchema))
   async store(@Body() body: CreateGudangDto): Promise<SuccessResponse> {
     try {
       return {
@@ -99,6 +102,7 @@ export class GudangController {
 
   @Post('entry')
   @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(createEntrySchema))
   async storeEntry(@Body() body: CreateEntryDto): Promise<SuccessResponse> {
     try {
       return {
@@ -111,18 +115,18 @@ export class GudangController {
     }
   }
 
-  @Patch('stok')
-  @HttpCode(HttpStatus.OK)
-  @UsePipes(new ZodValidationPipe(updateGudangSchema))
-  async updateStok(@Body() body: UpdateGudangDto): Promise<SuccessResponse> {
-    try {
-      return {
-        success: true,
-        status_code: HttpStatus.OK,
-        data: await this.gudangService.updateGudang(body),
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
+  // @Patch('stok')
+  // @HttpCode(HttpStatus.OK)
+  // @UsePipes(new ZodValidationPipe(updateGudangSchema))
+  // async updateStok(@Body() body: UpdateGudangDto): Promise<SuccessResponse> {
+  //   try {
+  //     return {
+  //       success: true,
+  //       status_code: HttpStatus.OK,
+  //       data: await this.gudangService.updateGudang(body),
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }

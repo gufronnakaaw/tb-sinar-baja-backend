@@ -15,6 +15,7 @@ export const updateGudangSchema = z.object({
 export type UpdateGudangDto = z.infer<typeof updateGudangSchema>;
 
 export const createEntrySchema = z.object({
+  preorder_id: z.string(),
   produk_baik: z
     .array(
       z.object({
