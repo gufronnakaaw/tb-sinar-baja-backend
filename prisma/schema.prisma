@@ -325,6 +325,7 @@ model Preorder {
 
   preorderdetail          PreorderDetail[] 
   invoice                 Invoice[]
+  entry                   Entry[]
 
   @@map("preorder")
 }
@@ -517,6 +518,10 @@ model Entry {
   kode_item               String        @db.VarChar(255)
   nama_produk             String        @db.VarChar(255)
   jumlah                  Float         @db.Float()
+  status                  String        @db.VarChar(255)  @default("show")
+  preorder_id             String
+
+  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
