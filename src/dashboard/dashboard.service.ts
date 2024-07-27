@@ -99,13 +99,15 @@ export class DashboardService {
   }
 
   async getBarangRusak() {
-    const rusak = await this.prisma.beritaAcaraDetail.aggregate({
-      _sum: {
-        jumlah: true,
+    const rusak = await this.prisma.beritaAcaraDetail.findMany({
+      where: {
+        beritaacara: {
+          type: 'internal',
+        },
       },
     });
 
-    return rusak._sum.jumlah;
+    return rusak.reduce((a, b) => a + b.jumlah, 0);
   }
 
   async getEstimasiRugi() {
