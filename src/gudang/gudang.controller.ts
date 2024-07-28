@@ -19,6 +19,8 @@ import {
   createGudangSchema,
   UpdateGudangDto,
   updateGudangSchema,
+  updateStokGudang,
+  UpdateStokGudangDto,
 } from './gudang.dto';
 import { GudangService } from './gudang.service';
 
@@ -115,18 +117,20 @@ export class GudangController {
     }
   }
 
-  // @Patch('stok')
-  // @HttpCode(HttpStatus.OK)
-  // @UsePipes(new ZodValidationPipe(updateGudangSchema))
-  // async updateStok(@Body() body: UpdateGudangDto): Promise<SuccessResponse> {
-  //   try {
-  //     return {
-  //       success: true,
-  //       status_code: HttpStatus.OK,
-  //       data: await this.gudangService.updateGudang(body),
-  //     };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  @Patch('stok')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateStokGudang))
+  async updateStok(
+    @Body() body: UpdateStokGudangDto,
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.gudangService.updateStokGudang(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { generateID } from 'src/utils/generate.util';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreateEntryDto, CreateGudangDto, UpdateGudangDto } from './gudang.dto';
+import {
+  CreateEntryDto,
+  CreateGudangDto,
+  UpdateGudangDto,
+  UpdateStokGudangDto,
+} from './gudang.dto';
 
 @Injectable()
 export class GudangService {
@@ -118,6 +123,7 @@ export class GudangService {
         status: 'show',
       },
       select: {
+        id_table: true,
         kode_item: true,
         nama_produk: true,
         jumlah: true,
@@ -196,5 +202,41 @@ export class GudangService {
         };
       }),
     });
+  }
+
+  async updateStokGudang({ list_produk }: UpdateStokGudangDto) {
+    for (const produk of list_produk) {
+      const gudang = produk.gudang_id.split(',');
+      const stok = produk.jumlah_entry.split(',');
+
+      for (const [index, item] of gudang.entries()) {
+        await this.prisma.stock.updateMany({
+          where: {
+            produk_id: produk.kode_item,
+            gudang: {
+              kode_gudang: item.toUpperCase().trim(),
+            },
+          },
+          data: {
+            stok: {
+              increment: parseFloat(stok[index]),
+            },
+          },
+        });
+
+        await this.prisma.entry.update({
+          where: {
+            id_table: produk.id_table,
+          },
+          data: {
+            status: 'hide',
+          },
+        });
+      }
+    }
+
+    return {
+      total: list_produk.length,
+    };
   }
 }

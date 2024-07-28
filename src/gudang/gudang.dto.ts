@@ -41,11 +41,13 @@ export const updateStokGudang = z.object({
   list_produk: z
     .array(
       z.object({
+        id_table: z.number(),
         kode_item: z.string(),
-        nama_produk: z.string().trim(),
-        jumlah: z.number().positive(),
-        gudang: z.string(),
+        jumlah_entry: z.string(),
+        gudang_id: z.string(),
       }),
     )
     .min(1),
 });
+
+export type UpdateStokGudangDto = z.infer<typeof updateStokGudang>;
