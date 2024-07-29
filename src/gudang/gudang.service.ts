@@ -141,7 +141,7 @@ export class GudangService {
         select: {
           gudang: {
             select: {
-              nama: true,
+              kode_gudang: true,
             },
           },
         },
@@ -149,7 +149,7 @@ export class GudangService {
 
       results.push({
         ...produk[index],
-        gudang: stok.map((el) => el.gudang.nama),
+        gudang: stok.map((el) => el.gudang.kode_gudang),
       });
     }
 
