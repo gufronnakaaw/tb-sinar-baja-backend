@@ -53,8 +53,12 @@ export class ReturnService {
         kode_item: item.kode_item,
         harga: item.harga,
         harga_setelah_diskon: item.harga_setelah_diskon,
-        diskon_langsung_item: item.diskon_langsung_item,
-        diskon_persen_item: item.diskon_persen_item,
+        diskon_langsung_item: !item.diskon_langsung_item
+          ? 0
+          : item.diskon_langsung_item,
+        diskon_persen_item: !item.diskon_persen_item
+          ? 0
+          : item.diskon_persen_item,
         penalti_item: item.penalti,
         jumlah: item.dikembalikan,
         gudang: item.gudang,
@@ -62,7 +66,7 @@ export class ReturnService {
         satuan: item.satuan,
         sub_total: item.sub_total,
         total_pengembalian: item.total_pengembalian,
-        diskon_per_item: item.diskon_per_item,
+        diskon_per_item: !item.diskon_per_item ? 0 : item.diskon_per_item,
       });
     }
 
