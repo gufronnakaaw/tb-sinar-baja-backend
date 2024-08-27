@@ -16,7 +16,7 @@ export const createReturnSchema = z.object({
       satuan: z.string(),
       nama_produk: z.string(),
       gudang: z.string(),
-      rak: z.string(),
+      rak: z.string().nullable().optional(),
       harga: z.number(),
       sub_total: z.number(),
       diskon_langsung_item: z.number().nullable().optional(),

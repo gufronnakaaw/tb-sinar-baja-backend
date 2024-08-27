@@ -62,7 +62,7 @@ export class ReturnService {
         penalti_item: item.penalti,
         jumlah: item.dikembalikan,
         gudang: item.gudang,
-        rak: stock[0].rak,
+        rak: stock[0].rak ? stock[0].rak : '-',
         satuan: item.satuan,
         sub_total: item.sub_total,
         total_pengembalian: item.total_pengembalian,
