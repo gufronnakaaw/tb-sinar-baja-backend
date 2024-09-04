@@ -304,8 +304,8 @@ export class KeuanganService {
 
         return {
           ...all,
-          id_invoice: invoicekeluar ? invoicekeluar[0].id_invoice : null,
-          sisa: invoicekeluar ? invoicekeluar[0].sisa : null,
+          id_invoice: invoicekeluar.length ? invoicekeluar[0].id_invoice : null,
+          sisa: invoicekeluar.length ? invoicekeluar[0].sisa : null,
         };
       }),
       total_items: await this.prisma.transaksi.count({
