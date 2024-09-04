@@ -63,6 +63,8 @@ export class KeuanganService {
         const today = date.toISOString().split('T')[0];
         return item.tanggal != today;
       }),
+      total_items: result.length,
+      page,
     };
   }
 
@@ -161,6 +163,8 @@ export class KeuanganService {
         const today = date.toISOString().split('T')[0];
         return item.tanggal != today;
       }),
+      total_items: result.length,
+      page,
     };
   }
 
@@ -227,27 +231,31 @@ export class KeuanganService {
       skip: (page - 1) * limit,
     });
 
-    return invoice.map((item) => {
-      let status = '';
-      if (item.invoicedetail.reduce((a, b) => a + b.jumlah, 0) == 0) {
-        status += 'hutang';
-      } else if (
-        item.invoicedetail.reduce((a, b) => a + b.jumlah, 0) < item.tagihan
-      ) {
-        status += 'pembayaran';
-      } else if (
-        item.invoicedetail.reduce((a, b) => a + b.jumlah, 0) >= item.tagihan
-      ) {
-        status += 'lunas';
-      }
+    return {
+      invoices: invoice.map((item) => {
+        let status = '';
+        if (item.invoicedetail.reduce((a, b) => a + b.jumlah, 0) == 0) {
+          status += 'hutang';
+        } else if (
+          item.invoicedetail.reduce((a, b) => a + b.jumlah, 0) < item.tagihan
+        ) {
+          status += 'pembayaran';
+        } else if (
+          item.invoicedetail.reduce((a, b) => a + b.jumlah, 0) >= item.tagihan
+        ) {
+          status += 'lunas';
+        }
 
-      delete item.invoicedetail;
+        delete item.invoicedetail;
 
-      return {
-        ...item,
-        status,
-      };
-    });
+        return {
+          ...item,
+          status,
+        };
+      }),
+      total_items: await this.prisma.invoice.count(),
+      page,
+    };
   }
 
   async getReceivable(query: KeuanganQuery) {
@@ -277,14 +285,20 @@ export class KeuanganService {
       skip: (page - 1) * limit,
     });
 
-    return transaksi.map((item) => {
-      const { invoicekeluar, ...all } = item;
+    return {
+      transaksi: transaksi.map((item) => {
+        const { invoicekeluar, ...all } = item;
 
-      return {
-        ...all,
-        id_invoice: invoicekeluar[0].id_invoice,
-        sisa: invoicekeluar[0].sisa,
-      };
-    });
+        return {
+          ...all,
+          id_invoice: invoicekeluar[0].id_invoice,
+          sisa: invoicekeluar[0].sisa,
+        };
+      }),
+      total_items: await this.prisma.transaksi.count({
+        where: { metode: 'tempo' },
+      }),
+      page,
+    };
   }
 }
