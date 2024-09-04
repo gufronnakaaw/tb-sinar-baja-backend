@@ -231,6 +231,12 @@ export class KeuanganService {
       skip: (page - 1) * limit,
     });
 
+    const hutang = await this.prisma.invoice.aggregate({
+      _sum: {
+        sisa: true,
+      },
+    });
+
     return {
       invoices: invoice.map((item) => {
         let status = '';
@@ -255,6 +261,7 @@ export class KeuanganService {
       }),
       total_items: await this.prisma.invoice.count(),
       page,
+      total: hutang._sum.sisa,
     };
   }
 
@@ -285,6 +292,12 @@ export class KeuanganService {
       skip: (page - 1) * limit,
     });
 
+    const piutang = await this.prisma.invoiceKeluar.aggregate({
+      _sum: {
+        sisa: true,
+      },
+    });
+
     return {
       transaksi: transaksi.map((item) => {
         const { invoicekeluar, ...all } = item;
@@ -299,6 +312,7 @@ export class KeuanganService {
         where: { metode: 'tempo' },
       }),
       page,
+      total: piutang._sum.sisa,
     };
   }
 }
