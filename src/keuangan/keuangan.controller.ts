@@ -7,12 +7,12 @@ import { KeuanganService } from './keuangan.service';
 export class KeuanganController {
   constructor(private readonly keuanganService: KeuanganService) {}
 
-  @Get('profit')
+  @Get('omzet')
   @HttpCode(HttpStatus.OK)
-  async getProfit(@Query() query: KeuanganQuery): Promise<SuccessResponse> {
+  async getOmzet(@Query() query: KeuanganQuery): Promise<SuccessResponse> {
     try {
       if (query.date) {
-        const data = await this.keuanganService.detailProfit(query.date);
+        const data = await this.keuanganService.detailOmzet(query.date);
         return {
           success: true,
           status_code: HttpStatus.OK,
@@ -23,7 +23,7 @@ export class KeuanganController {
       return {
         success: true,
         status_code: HttpStatus.OK,
-        data: await this.keuanganService.getProfit(query),
+        data: await this.keuanganService.getOmzet(query),
       };
     } catch (error) {
       throw error;

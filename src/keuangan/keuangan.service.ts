@@ -6,7 +6,7 @@ import { KeuanganQuery } from './keuangan.dto';
 export class KeuanganService {
   constructor(private prisma: PrismaService) {}
 
-  async getProfit(query: KeuanganQuery) {
+  async getOmzet(query: KeuanganQuery) {
     const limit = 7;
     const page = query.page ? parseInt(query.page) : 1;
 
@@ -68,7 +68,7 @@ export class KeuanganService {
     };
   }
 
-  async detailProfit(date: string) {
+  async detailOmzet(date: string) {
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
 
