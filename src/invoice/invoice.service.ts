@@ -178,6 +178,30 @@ export class InvoiceService {
     }
 
     if (body.sumber == 'supplier') {
+      if (body.tipe == 'cash') {
+        return this.prisma.$transaction([
+          this.prisma.invoice.update({
+            where: {
+              id_invoice: body.invoice_id,
+            },
+            data: {
+              sisa: {
+                decrement: body.jumlah,
+              },
+            },
+          }),
+
+          this.prisma.invoiceDetail.create({
+            data: {
+              invoice_id: body.invoice_id,
+              id_transaksi: body.id_transaksi,
+              tipe: body.tipe,
+              jumlah: body.jumlah,
+            },
+          }),
+        ]);
+      }
+
       const supplierbank = await this.prisma.supplierBank.findUnique({
         where: {
           id_table: body.bank_id,
