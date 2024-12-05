@@ -30,6 +30,11 @@ export class InvoiceService {
             jumlah: true,
           },
         },
+        preorder: {
+          select: {
+            nama_supplier: true,
+          },
+        },
         created_at: true,
       },
       orderBy: {
@@ -51,10 +56,14 @@ export class InvoiceService {
         status += 'lunas';
       }
 
+      const nama_supplier = item.preorder.nama_supplier;
+
       delete item.invoicedetail;
+      delete item.preorder;
 
       return {
         ...item,
+        nama_supplier,
         status,
       };
     });
