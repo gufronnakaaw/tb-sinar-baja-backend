@@ -290,6 +290,7 @@ export class InvoiceService {
         transaksi: {
           select: {
             status: true,
+            penerima: true,
           },
         },
       },
@@ -300,13 +301,14 @@ export class InvoiceService {
 
     return result.map((item) => {
       const { transaksi, ...invout } = item;
-      const { status } = transaksi;
+      const { status, penerima } = transaksi;
 
       delete item.transaksi;
 
       return {
         ...invout,
         status,
+        penerima,
       };
     });
   }
