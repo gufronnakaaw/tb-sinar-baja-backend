@@ -40,7 +40,7 @@ model SubKategori {
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
-  kategori         Kategori @relation(fields: [kategori_id], references: [id_kategori], onUpdate: NoAction, onDelete:  Restrict)
+  kategori         Kategori @relation(fields: [kategori_id], references: [id_kategori], onUpdate: NoAction, onDelete:  Cascade)
 
   produk           Produk[]
 
@@ -77,7 +77,7 @@ model Produk {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Restrict)
+  subkategori             SubKategori   @relation(fields: [subkategori_id], references: [id_subkategori], onUpdate: NoAction, onDelete: Cascade)
   pricelist               Pricelist[]
   hargaquantity           HargaQuantity[]
   stock                   Stock[]
@@ -108,8 +108,8 @@ model Stock {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  produk                  Produk        @relation(fields: [produk_id], references: [kode_item])
-  gudang                  Gudang?        @relation(fields: [gudang_id], references: [kode_gudang])
+  produk                  Produk        @relation(fields: [produk_id], references: [kode_item], onDelete: Cascade)
+  gudang                  Gudang?        @relation(fields: [gudang_id], references: [kode_gudang], onDelete: Cascade)
 
   @@map("stock")
 }
@@ -169,7 +169,7 @@ model TransaksiDetail {
   diskon_persen_item      Int?          @db.UnsignedInt
   sub_total               Int           @db.UnsignedInt
 
-  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi], onUpdate: NoAction, onDelete: Restrict)
+  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi], onUpdate: NoAction, onDelete: Cascade)
 
   @@map("transaksidetail")
 }
@@ -183,7 +183,7 @@ model SuratJalan {
   plat_kendaraan          String?       @db.VarChar(255)
   verifikasi              Boolean       @default(false)
 
-  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi])
+  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi], onDelete: Cascade)
 
   @@map("suratjalan")
 }
@@ -303,7 +303,7 @@ model PenawaranDetail {
   harga                   Int?
   jumlah                  Int?          
 
-  penawaran               Penawaran     @relation(fields: [penawaran_id], references: [id_penawaran])
+  penawaran               Penawaran     @relation(fields: [penawaran_id], references: [id_penawaran], onDelete: Cascade)
 
   @@map("penawarandetail")
 }
@@ -341,7 +341,7 @@ model PreorderDetail  {
   harga                   Int?
   jumlah                  Int?  
 
-  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
+  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder], onDelete: Cascade)
   
   @@map("preorderdetail")
 }
@@ -358,7 +358,7 @@ model Invoice {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
+  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder], onDelete: Cascade)
   invoicedetail           InvoiceDetail[]
 
   @@map("invoice")
@@ -377,7 +377,7 @@ model InvoiceDetail {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
    
-  invoice                 Invoice       @relation(fields: [invoice_id], references: [id_invoice])
+  invoice                 Invoice       @relation(fields: [invoice_id], references: [id_invoice], onDelete: Cascade)
 
   @@map("invoicedetail")
 }
@@ -397,7 +397,7 @@ model HargaQuantity {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
 
-  produk                  Produk        @relation(fields: [produk_id], references: [kode_item])
+  produk                  Produk        @relation(fields: [produk_id], references: [kode_item], onDelete: Cascade)
 
   @@map("hargaquantity")
 }
@@ -415,7 +415,7 @@ model InvoiceKeluar {
   updated_at              DateTime      @updatedAt
 
   invoicekeluardetail     InvoiceKeluarDetail[]
-  transaksi               Transaksi      @relation(fields: [transaksi_id], references: [id_transaksi])
+  transaksi               Transaksi      @relation(fields: [transaksi_id], references: [id_transaksi], onDelete: Cascade)
 
   @@map("invoicekeluar")
 }
@@ -433,7 +433,7 @@ model InvoiceKeluarDetail {
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
    
-  invoicekeluar           InvoiceKeluar @relation(fields: [invoice_id], references: [id_invoice])
+  invoicekeluar           InvoiceKeluar @relation(fields: [invoice_id], references: [id_invoice], onDelete: Cascade)
 
   @@map("invoicekeluardetail")
 }
@@ -453,7 +453,7 @@ model Return {
   updated_at              DateTime      @updatedAt
 
   returndetail            ReturnDetail[]
-  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi])
+  transaksi               Transaksi     @relation(fields: [transaksi_id], references: [id_transaksi], onDelete: Cascade)
 
   @@map("return")
 }
@@ -476,8 +476,7 @@ model ReturnDetail {
   total_pengembalian      Int           @db.UnsignedInt
   harga_setelah_diskon    Int           @db.UnsignedInt
   
-
-  return                Return          @relation(fields: [return_id], references: [id_return])
+  return                Return          @relation(fields: [return_id], references: [id_return], onDelete: Cascade)
   
   @@map("returndetail")
 }
@@ -508,7 +507,7 @@ model BeritaAcaraDetail {
   tipe_harga              String        @db.VarChar(255)
   total                   Int           @db.UnsignedInt
 
-  beritaacara             BeritaAcara   @relation(fields: [ba_id], references: [id_ba])
+  beritaacara             BeritaAcara   @relation(fields: [ba_id], references: [id_ba], onDelete: Cascade)
 
   @@map("beritaacaradetail")
 }
@@ -521,7 +520,7 @@ model Entry {
   status                  String        @db.VarChar(255)  @default("show")
   preorder_id             String
 
-  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder])
+  preorder                Preorder      @relation(fields: [preorder_id], references: [id_preorder], onDelete: Cascade)
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
