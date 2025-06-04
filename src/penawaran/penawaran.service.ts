@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { generateID } from '../utils/generate.util';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreatePenawaranDto, UpdateStatusPenawaranDto } from './penawaran.dto';
+import {
+  CreatePenawaranDto,
+  UpdatePenawaranDto,
+  UpdateStatusPenawaranDto,
+} from './penawaran.dto';
 
 @Injectable()
 export class PenawaranService {
@@ -101,6 +105,67 @@ export class PenawaranService {
           },
         },
         created_at: date,
+        updated_at: date,
+      },
+    });
+  }
+
+  async updatePenawaran(id_penawaran: string, body: UpdatePenawaranDto) {
+    const penawaran = await this.prisma.penawaran.findUnique({
+      where: {
+        id_penawaran,
+      },
+    });
+
+    if (!penawaran) {
+      throw new NotFoundException('Penawaran tidak ditemukan');
+    }
+
+    const supplier = await this.prisma.supplier.findUnique({
+      where: {
+        id_supplier: body.supplier_id,
+      },
+    });
+
+    if (!supplier) {
+      throw new NotFoundException('Supplier tidak ditemukan');
+    }
+
+    const date = new Date();
+
+    const produk = body.produk.map((item) => {
+      return {
+        kode_item: item.kode_item,
+        kode_pabrik: item.kode_pabrik,
+        nama_produk: item.nama_produk,
+        qty: item.qty,
+        satuan: item.satuan,
+        harga: item.harga,
+        jumlah: item.jumlah,
+      };
+    });
+
+    await this.prisma.penawaranDetail.deleteMany({
+      where: {
+        penawaran_id: id_penawaran,
+      },
+    });
+
+    return this.prisma.penawaran.update({
+      where: {
+        id_penawaran,
+      },
+      data: {
+        supplier_id: body.supplier_id,
+        nama_supplier: supplier.nama,
+        email_supplier: supplier.email,
+        alamat: supplier.alamat_kantor,
+        no_telp: supplier.no_telp,
+        penawarandetail: {
+          createMany: {
+            data: produk,
+          },
+        },
         updated_at: date,
       },
     });

@@ -14,8 +14,10 @@ import { ZodValidationPipe } from '../utils/pipes/zod.pipe';
 import {
   CreatePenawaranDto,
   PenawaranQuery,
+  UpdatePenawaranDto,
   UpdateStatusPenawaranDto,
   createPenawaranSchema,
+  updatePenawaranSchema,
   updateStatusPenawaranSchema,
 } from './penawaran.dto';
 import { PenawaranService } from './penawaran.service';
@@ -57,6 +59,26 @@ export class PenawaranController {
         success: true,
         status_code: HttpStatus.CREATED,
         data: await this.penawaranService.createPenawaran(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch()
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updatePenawaranSchema))
+  async updatePenawaran(
+    @Body() body: UpdatePenawaranDto,
+  ): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.penawaranService.updatePenawaran(
+          body.id_penawaran,
+          body,
+        ),
       };
     } catch (error) {
       throw error;
