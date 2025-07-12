@@ -73,6 +73,9 @@ export class DashboardService {
       _sum: {
         total_pembayaran: true,
       },
+      where: {
+        state: 'success',
+      },
     });
 
     return omzet._sum.total_pembayaran;
