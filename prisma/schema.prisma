@@ -114,6 +114,11 @@ model Stock {
   @@map("stock")
 }
 
+enum StateTransaksi {
+  success
+  cancelled
+}
+
 model Transaksi {
   id_table                Int           @id               @default(autoincrement())
   id_transaksi            String        @db.VarChar(255)  @unique           
@@ -143,6 +148,7 @@ model Transaksi {
   dp                      Int?          @db.UnsignedInt
   pembayaran              Int?          @db.UnsignedInt
   estimasi                String?       @db.VarChar(255)
+  state                   StateTransaksi @default(success)
 
   created_at              DateTime      @default(now())
   updated_at              DateTime      @updatedAt
