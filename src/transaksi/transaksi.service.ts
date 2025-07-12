@@ -715,7 +715,7 @@ export class TransaksiService {
 
     return this.prisma.transaksi.update({
       where: { id_transaksi: body.transaksi_id },
-      data: { status: body.state },
+      data: { state: body.state },
     });
   }
 
