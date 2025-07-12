@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { generateID } from 'src/utils/generate.util';
 import { PrismaService } from '../utils/services/prisma.service';
-import { CreateTransaksiDto, TransaksiQuery } from './transaksi.dto';
+import {
+  CreateTransaksiDto,
+  TransaksiQuery,
+  UpdateStateDto,
+} from './transaksi.dto';
 
 @Injectable()
 export class TransaksiService {
@@ -209,7 +213,7 @@ export class TransaksiService {
     const data = [];
 
     for (const produk of body.list_produk) {
-      const [stock, update] = await this.prisma.$transaction([
+      const [stock, ,] = await this.prisma.$transaction([
         this.prisma.stock.findMany({
           select: {
             rak: true,
@@ -575,5 +579,157 @@ export class TransaksiService {
       ...results,
       list_produk: transaksidetail,
     };
+  }
+
+  // async updateTransaksi(body: UpdateTransaksiDto) {
+  //   const transaksi = await this.prisma.transaksi.findUnique({
+  //     where: { id_transaksi: body.id_transaksi },
+  //     include: {
+  //       transaksidetail: true,
+  //     },
+  //   });
+  //   if (!transaksi) {
+  //     throw new NotFoundException('Transaksi tidak ditemukan');
+  //   }
+
+  //   for (const detail of transaksi.transaksidetail) {
+  //     await this.prisma.stock.updateMany({
+  //       where: {
+  //         produk_id: detail.kode_item,
+  //         gudang: { nama: detail.gudang },
+  //       },
+  //       data: {
+  //         stok: { increment: detail.jumlah },
+  //       },
+  //     });
+  //   }
+
+  //   await this.prisma.transaksiDetail.deleteMany({
+  //     where: { transaksi_id: body.id_transaksi },
+  //   });
+
+  //   const newDetails = [];
+  //   for (const produk of body.list_produk) {
+  //     const [stock] = await this.prisma.$transaction([
+  //       this.prisma.stock.findMany({
+  //         select: { rak: true },
+  //         where: {
+  //           produk_id: produk.kode_item,
+  //           gudang: { nama: produk.gudang },
+  //         },
+  //       }),
+  //       this.prisma.stock.updateMany({
+  //         where: {
+  //           produk_id: produk.kode_item,
+  //           gudang: { nama: produk.gudang },
+  //         },
+  //         data: {
+  //           stok: { decrement: produk.jumlah },
+  //         },
+  //       }),
+  //     ]);
+  //     newDetails.push({
+  //       diskon_langsung_item: produk.diskon_langsung_item,
+  //       diskon_persen_item: produk.diskon_persen_item,
+  //       jumlah: produk.jumlah,
+  //       satuan: produk.satuan,
+  //       kode_item: produk.kode_item,
+  //       nama_produk: produk.nama_produk,
+  //       gudang: produk.gudang,
+  //       rak: stock[0]?.rak ?? null,
+  //       harga: produk.harga,
+  //       sub_total: produk.sub_total,
+  //     });
+  //   }
+
+  //   const date = new Date();
+  //   const updated = await this.prisma.transaksi.update({
+  //     where: { id_transaksi: body.id_transaksi },
+  //     data: {
+  //       keterangan: body.keterangan,
+  //       penerima: body.penerima,
+  //       no_telp: body.no_telp,
+  //       pengiriman: body.pengiriman,
+  //       alamat: body.alamat,
+  //       ongkir: body.ongkir,
+  //       pajak: body.pajak,
+  //       persen_pajak: body.persen_pajak,
+  //       diskon: body.diskon,
+  //       persen_diskon: body.persen_diskon,
+  //       total_belanja: body.total_belanja,
+  //       total_pembayaran: body.total_pembayaran,
+  //       tunai: body.tunai,
+  //       kembalian: body.kembalian,
+  //       tipe: body.tipe,
+  //       metode: body.metode,
+  //       asal_transaksi: body.asal_transaksi,
+  //       nama_bank: body.nama_bank,
+  //       atas_nama: body.atas_nama,
+  //       no_rekening: body.no_rekening,
+  //       id_transaksi_bank: body.id_transaksi_bank,
+  //       status: body.status,
+  //       dp: body.dp ?? null,
+  //       pembayaran: body.pembayaran ?? null,
+  //       estimasi: body.estimasi,
+  //       updated_at: date,
+  //       transaksidetail: {
+  //         createMany: { data: newDetails },
+  //       },
+  //     },
+  //     include: {
+  //       transaksidetail: {
+  //         select: {
+  //           kode_item: true,
+  //           jumlah: true,
+  //           satuan: true,
+  //           nama_produk: true,
+  //           harga: true,
+  //           gudang: true,
+  //           rak: true,
+  //           sub_total: true,
+  //           diskon_langsung_item: true,
+  //           diskon_persen_item: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   delete updated.id_table;
+  //   const { transaksidetail, ...results } = updated;
+  //   delete updated.transaksidetail;
+
+  //   return {
+  //     ...results,
+  //     list_produk: transaksidetail,
+  //   };
+  // }
+
+  async updateTransaksiState(body: UpdateStateDto) {
+    if (
+      !(await this.prisma.transaksi.count({
+        where: { id_transaksi: body.transaksi_id },
+      }))
+    ) {
+      throw new NotFoundException('Transaksi tidak ditemukan');
+    }
+
+    return this.prisma.transaksi.update({
+      where: { id_transaksi: body.transaksi_id },
+      data: { status: body.state },
+    });
+  }
+
+  async deleteTransaksi(transaksi_id: string) {
+    if (
+      !(await this.prisma.transaksi.count({
+        where: { id_transaksi: transaksi_id },
+      }))
+    ) {
+      throw new NotFoundException('Transaksi tidak ditemukan');
+    }
+
+    return this.prisma.transaksi.delete({
+      where: { id_transaksi: transaksi_id },
+    });
   }
 }
