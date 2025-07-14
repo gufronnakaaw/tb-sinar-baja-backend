@@ -705,12 +705,50 @@ export class TransaksiService {
   // }
 
   async updateTransaksiState(body: UpdateStateDto) {
-    if (
-      !(await this.prisma.transaksi.count({
-        where: { id_transaksi: body.transaksi_id },
-      }))
-    ) {
+    const transaksi = await this.prisma.transaksi.findUnique({
+      where: { id_transaksi: body.transaksi_id },
+      select: {
+        state: true,
+        transaksidetail: {
+          select: {
+            kode_item: true,
+            jumlah: true,
+            gudang: true,
+          },
+        },
+      },
+    });
+
+    if (!transaksi) {
       throw new NotFoundException('Transaksi tidak ditemukan');
+    }
+
+    if (body.state === 'cancelled' && transaksi.state === 'success') {
+      for (const element of transaksi.transaksidetail) {
+        await this.prisma.stock.updateMany({
+          where: {
+            produk_id: element.kode_item,
+            gudang: { nama: element.gudang },
+          },
+          data: {
+            stok: { increment: element.jumlah },
+          },
+        });
+      }
+    }
+
+    if (body.state === 'success' && transaksi.state === 'cancelled') {
+      for (const element of transaksi.transaksidetail) {
+        await this.prisma.stock.updateMany({
+          where: {
+            produk_id: element.kode_item,
+            gudang: { nama: element.gudang },
+          },
+          data: {
+            stok: { decrement: element.jumlah },
+          },
+        });
+      }
     }
 
     return this.prisma.transaksi.update({
@@ -720,12 +758,33 @@ export class TransaksiService {
   }
 
   async deleteTransaksi(transaksi_id: string) {
-    if (
-      !(await this.prisma.transaksi.count({
-        where: { id_transaksi: transaksi_id },
-      }))
-    ) {
+    const transaksi = await this.prisma.transaksi.findUnique({
+      where: { id_transaksi: transaksi_id },
+      select: {
+        transaksidetail: {
+          select: {
+            kode_item: true,
+            jumlah: true,
+            gudang: true,
+          },
+        },
+      },
+    });
+
+    if (!transaksi) {
       throw new NotFoundException('Transaksi tidak ditemukan');
+    }
+
+    for (const element of transaksi.transaksidetail) {
+      await this.prisma.stock.updateMany({
+        where: {
+          produk_id: element.kode_item,
+          gudang: { nama: element.gudang },
+        },
+        data: {
+          stok: { increment: element.jumlah },
+        },
+      });
     }
 
     return this.prisma.transaksi.delete({
