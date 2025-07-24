@@ -9,6 +9,7 @@ import {
   CreateSupplierDto,
   CreateSupplierPricelistDto,
   SupplierPricelistQuery,
+  UpdateBankDto,
   UpdateSupplierDto,
   UpdateSupplierPricelistDto,
 } from './supplier.dto';
@@ -71,6 +72,29 @@ export class SupplierService {
     return this.prisma.supplierBank.create({
       data: {
         supplier_id: body.id_supplier,
+        nama: body.nama,
+        atas_nama: body.atas_nama,
+        no_rekening: body.no_rekening,
+      },
+    });
+  }
+
+  async updateSupplierBank(body: UpdateBankDto) {
+    if (
+      !(await this.prisma.supplierBank.count({
+        where: {
+          id_table: body.bank_id,
+        },
+      }))
+    ) {
+      throw new NotFoundException('Bank tidak ditemukan');
+    }
+
+    return this.prisma.supplierBank.update({
+      where: {
+        id_table: body.bank_id,
+      },
+      data: {
         nama: body.nama,
         atas_nama: body.atas_nama,
         no_rekening: body.no_rekening,

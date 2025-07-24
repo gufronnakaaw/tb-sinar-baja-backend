@@ -43,6 +43,15 @@ export const createBankSchema = z.object({
 
 export type CreateBankDto = z.infer<typeof createBankSchema>;
 
+export const updateBankSchema = z.object({
+  bank_id: z.number(),
+  nama: z.string().optional(),
+  atas_nama: z.string().optional(),
+  no_rekening: z.string().optional(),
+});
+
+export type UpdateBankDto = z.infer<typeof updateBankSchema>;
+
 export const createSupplierPricelistSchema = z.object({
   supplier_id: z.string(),
   harga: z.number(),

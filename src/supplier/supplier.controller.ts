@@ -18,11 +18,13 @@ import {
   CreateSupplierDto,
   CreateSupplierPricelistDto,
   SupplierPricelistQuery,
+  UpdateBankDto,
   UpdateSupplierDto,
   UpdateSupplierPricelistDto,
   createBankSchema,
   createSupplierPricelistSchema,
   createSupplierSchema,
+  updateBankSchema,
   updateSupplierPricelistSchema,
   updateSupplierSchema,
 } from './supplier.dto';
@@ -117,6 +119,21 @@ export class SupplierController {
         success: true,
         status_code: HttpStatus.CREATED,
         data: await this.supplierService.createSupplierBank(body),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('bank')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ZodValidationPipe(updateBankSchema))
+  async updateBank(@Body() body: UpdateBankDto): Promise<SuccessResponse> {
+    try {
+      return {
+        success: true,
+        status_code: HttpStatus.OK,
+        data: await this.supplierService.updateSupplierBank(body),
       };
     } catch (error) {
       throw error;
