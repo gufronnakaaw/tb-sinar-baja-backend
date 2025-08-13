@@ -192,16 +192,80 @@ export class GudangService {
       });
     }
 
-    return this.prisma.entry.createMany({
-      data: produk_baik.map((item) => {
-        return {
-          kode_item: item.kode_item,
-          nama_produk: item.nama_produk,
-          jumlah: item.jumlah_entry,
-          preorder_id,
-        };
-      }),
+    await this.prisma.entry.createMany({
+      data: produk_baik.map((item) => ({
+        kode_item: item.kode_item,
+        nama_produk: item.nama_produk,
+        jumlah: item.jumlah_entry,
+        preorder_id,
+      })),
     });
+
+    const preorderDetails = await this.prisma.preorderDetail.findMany({
+      where: { preorder_id },
+      select: {
+        id_table: true,
+        kode_item: true,
+        qty: true,
+        nama_produk: true,
+        satuan: true,
+      },
+    });
+
+    const entries = await this.prisma.entry.findMany({
+      where: { preorder_id },
+      select: { kode_item: true, jumlah: true },
+    });
+
+    const sisaProduk: any[] = [];
+    const detailToDelete: number[] = [];
+    for (const detail of preorderDetails) {
+      const entry = entries.find((e) => e.kode_item === detail.kode_item);
+      const jumlahEntry = entry ? entry.jumlah : 0;
+      if (jumlahEntry < detail.qty && jumlahEntry > 0) {
+        await this.prisma.preorderDetail.update({
+          where: { id_table: detail.id_table },
+          data: { qty: detail.qty - jumlahEntry },
+        });
+        sisaProduk.push({
+          kode_item: detail.kode_item,
+          nama_produk: detail.nama_produk,
+          satuan: detail.satuan,
+          qty_preorder: detail.qty,
+          qty_entry: jumlahEntry,
+          sisa: detail.qty - jumlahEntry,
+        });
+      } else if (jumlahEntry < detail.qty) {
+        sisaProduk.push({
+          kode_item: detail.kode_item,
+          nama_produk: detail.nama_produk,
+          satuan: detail.satuan,
+          qty_preorder: detail.qty,
+          qty_entry: jumlahEntry,
+          sisa: detail.qty - jumlahEntry,
+        });
+      } else {
+        detailToDelete.push(detail.id_table);
+      }
+    }
+
+    if (sisaProduk.length === 0) {
+      await this.prisma.preorder.delete({
+        where: { id_preorder: preorder_id },
+      });
+      return { message: 'Preorder selesai & dihapus', preorder_id };
+    } else {
+      if (detailToDelete.length > 0) {
+        await this.prisma.preorderDetail.deleteMany({
+          where: { id_table: { in: detailToDelete } },
+        });
+      }
+      return {
+        message:
+          'Masih ada produk preorder yang belum di-entry, detail yang sudah terpenuhi dihapus/qty diupdate',
+        preorder_id,
+      };
+    }
   }
 
   async updateStokGudang({ list_produk }: UpdateStokGudangDto) {
