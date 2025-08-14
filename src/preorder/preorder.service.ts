@@ -30,11 +30,6 @@ export class PreorderService {
             },
           },
         },
-        entry: {
-          select: {
-            kode_item: true,
-          },
-        },
         preorderdetail: {
           select: {
             kode_item: true,
@@ -46,9 +41,10 @@ export class PreorderService {
       },
     });
 
-    return preorder.map((item) => {
-      const { invoice, entry, preorderdetail } = item;
-      delete item.entry;
+    const preorders = [];
+
+    for (const item of preorder) {
+      const { invoice, preorderdetail } = item;
       delete item.preorderdetail;
 
       let status = '';
@@ -74,6 +70,12 @@ export class PreorderService {
         delete item.invoice;
       }
 
+      const entry = await this.prisma.entry.findMany({
+        where: {
+          preorder_id: item.id_preorder,
+        },
+      });
+
       return {
         ...item,
         sumber: !item.supplier_id ? 'non_supplier' : 'supplier',
@@ -82,7 +84,9 @@ export class PreorderService {
         item_masuk: entry.length,
         item_order: preorderdetail.length,
       };
-    });
+    }
+
+    return preorders;
   }
 
   async getPreorderById(id_preorder: string) {
