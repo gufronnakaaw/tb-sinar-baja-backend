@@ -74,16 +74,19 @@ export class PreorderService {
         where: {
           preorder_id: item.id_preorder,
         },
+        select: {
+          kode_item: true,
+        },
       });
 
-      return {
+      preorders.push({
         ...item,
         sumber: !item.supplier_id ? 'non_supplier' : 'supplier',
         status,
         entry_gudang: Boolean(entry.length),
         item_masuk: entry.length,
         item_order: preorderdetail.length,
-      };
+      });
     }
 
     return preorders;
