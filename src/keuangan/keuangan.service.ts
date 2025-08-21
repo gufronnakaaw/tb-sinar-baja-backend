@@ -28,6 +28,9 @@ export class KeuanganService {
 
     const transaksiPerHari = await this.prisma.transaksi.groupBy({
       by: ['created_at'],
+      where: {
+        state: 'success',
+      },
       _sum: {
         total_pembayaran: true,
       },
@@ -81,6 +84,7 @@ export class KeuanganService {
           gte: start,
           lte: end,
         },
+        state: 'success',
       },
       select: {
         id_transaksi: true,
