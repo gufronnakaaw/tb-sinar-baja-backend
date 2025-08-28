@@ -219,6 +219,7 @@ export class GudangService {
 
     const sisaProduk: any[] = [];
     const detailToDelete: number[] = [];
+
     for (const detail of preorderDetails) {
       const entry = entries.find((e) => e.kode_item === detail.kode_item);
       const jumlahEntry = entry ? entry.jumlah : 0;
@@ -249,7 +250,7 @@ export class GudangService {
       }
     }
 
-    if (sisaProduk.length === 0) {
+    if (detailToDelete.length === preorderDetails.length) {
       await this.prisma.preorder.delete({
         where: { id_preorder: preorder_id },
       });
@@ -289,14 +290,30 @@ export class GudangService {
         });
       }
 
-      await this.prisma.entry.update({
+      const sisa = await this.prisma.entry.update({
         where: {
           id_table: produk.id_table,
         },
         data: {
-          status: 'hide',
+          jumlah: {
+            decrement: parseFloat(produk.jumlah_entry),
+          },
+        },
+        select: {
+          jumlah: true,
         },
       });
+
+      if (!sisa.jumlah) {
+        await this.prisma.entry.update({
+          where: {
+            id_table: produk.id_table,
+          },
+          data: {
+            status: 'hide',
+          },
+        });
+      }
     }
 
     return {
