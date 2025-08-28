@@ -287,16 +287,16 @@ export class GudangService {
             },
           },
         });
-
-        await this.prisma.entry.update({
-          where: {
-            id_table: produk.id_table,
-          },
-          data: {
-            status: 'hide',
-          },
-        });
       }
+
+      await this.prisma.entry.update({
+        where: {
+          id_table: produk.id_table,
+        },
+        data: {
+          status: 'hide',
+        },
+      });
     }
 
     return {
